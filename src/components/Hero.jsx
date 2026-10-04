@@ -287,7 +287,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
             <div className="hero-badge hero-badge-pune">
               <span className="badge-live-dot" />
               <span className="badge-pune-tag">PUNE LAUNCH EDITION</span>
-              <span className="badge-sub">73 Localities • 39+ SPPU & DTE Verified Campuses</span>
+              <span className="badge-sub">73 Localities • 45+ SPPU & DTE Verified Campuses</span>
             </div>
           </motion.div>
 
@@ -384,7 +384,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                               <span className="active-hub-badge">✓ Active Hub</span>
                             </div>
                             <p className="city-description">
-                              {PUNE_CITY.tagline}. Currently indexing 73 urban localities and 39+ verified higher education institutions.
+                              {PUNE_CITY.tagline}. Currently indexing 73 urban localities and 45+ verified higher education institutions.
                             </p>
                           </div>
 
@@ -425,7 +425,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                         <span className="trigger-value">{currentAreaObj.name}</span>
                         <span className="trigger-caption">
                           {selectedAreaSlug === 'all' 
-                            ? 'All 73 Localities (39+ Campuses)' 
+                            ? 'All 73 Localities (45+ Campuses)' 
                             : currentAreaObj.pincode 
                               ? `PIN: ${currentAreaObj.pincode}` 
                               : 'Pune Locality'}
@@ -464,7 +464,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                             >
                               <div className="option-info">
                                 <span className="option-title">🌟 All Pune Localities</span>
-                                <span className="option-desc">Search all 39+ verified colleges across Pune</span>
+                                <span className="option-desc">Search all 45+ verified colleges across Pune</span>
                               </div>
                               {selectedAreaSlug === 'all' && <IconCheck className="option-check" />}
                             </button>
@@ -528,7 +528,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                           {selectedCollege 
                             ? `${selectedCollege.areaName} • ${selectedCollege.affiliation.split('(')[0]}`
                             : selectedAreaSlug === 'all' 
-                              ? '39+ Official SPPU & DTE Campuses' 
+                              ? '45+ Official SPPU & DTE Campuses' 
                               : `Colleges in ${currentAreaObj.name}`}
                         </span>
                       </div>
@@ -867,7 +867,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-node">
                     <span className="node-college">
-                      {selectedCollege ? selectedCollege.shortName : '39+ Campuses'}
+                      {selectedCollege ? selectedCollege.shortName : '45+ Campuses'}
                     </span>
                     <span className="node-sub">SPPU &amp; DTE Anchor</span>
                   </div>

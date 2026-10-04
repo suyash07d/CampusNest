@@ -1,10 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'https://lclparkysukcnfjqbrzq.supabase.co';
-const supabasePublishableKey = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_BI68G8u_dn9pLM-aV9AVgA_rUIN8ebx';
+const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || '';
+const supabasePublishableKey = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+
+if (!supabaseUrl || !supabasePublishableKey) {
+  if (typeof window !== 'undefined') {
+    console.warn(
+      'CampusNest: Supabase environment variables missing. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY are configured in .env.local or your deployment settings.'
+    );
+  }
+}
 
 export const supabase = createClient(
   supabaseUrl,
   supabasePublishableKey
-)
-
+);

@@ -15,7 +15,7 @@ import {
 import './DiscoveryPreview.css';
 
 const STREAM_TABS = [
-  { id: 'all', label: 'All Streams (39)' },
+  { id: 'all', label: 'All Streams (45)' },
   { id: 'Engineering', label: 'Engineering & Tech' },
   { id: 'Management', label: 'Management / MBA' },
   { id: 'Science', label: 'Arts & Science' },
@@ -97,7 +97,7 @@ export default function DiscoveryPreview({ searchParams, onSelectCollege, onOpen
           </div>
           <div className="disclaimer-text">
             <strong>CampusNest Pune Verification Mission</strong>: We are currently conducting on-the-ground 
-            audits of student accommodations, PGs, and mess providers within walking radius of 39+ official SPPU 
+            audits of student accommodations, PGs, and mess providers within walking radius of 45+ official SPPU 
             and DTE Maharashtra campuses. Zero fabricated distances. Zero broker surprise charges.
           </div>
         </div>
@@ -240,7 +240,7 @@ export default function DiscoveryPreview({ searchParams, onSelectCollege, onOpen
           <div className="directory-header-controls">
             <div>
               <h3 className="directory-title">
-                Explore All 39+ Verified Pune Institutions
+                Explore 45+ Verified Pune Institutions
               </h3>
               <p className="directory-sub">
                 Click any institution to set as your anchor and view locality onboarding details.
