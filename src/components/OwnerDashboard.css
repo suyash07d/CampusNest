@@ -1,0 +1,29 @@
+/* ==========================================================================
+   CampusNest — Owner Dashboard Styles
+   ========================================================================== */
+
+.owner-header-accent {
+  border-left: 4px solid var(--accent-500);
+}
+
+.badge-owner {
+  color: var(--accent-600);
+  background: var(--accent-50);
+}
+
+.bg-amber-subtle {
+  background: var(--accent-50);
+}
+
+.text-amber {
+  color: var(--accent-500);
+}
+
+.dash-action-btn.secondary {
+  background: var(--text-primary);
+  color: #FFFFFF;
+}
+
+.dash-action-btn.secondary:hover {
+  background: #1E293B;
+}

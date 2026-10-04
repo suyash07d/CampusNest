@@ -1,0 +1,193 @@
+/* ==========================================================================
+   CampusNest — App Layout & Auth State Styles
+   ========================================================================== */
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.main-content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Auth Loading Screen (Initial Session Resolution)
+   ========================================================================== */
+.auth-loading-screen {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%);
+  padding: 1.5rem;
+}
+
+.auth-loading-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-light);
+  border-radius: 24px;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.loading-logo-box {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-900));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+}
+
+.loading-cap-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.loading-dot-pulse {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #10B981;
+  border: 2px solid #FFFFFF;
+  border-radius: 50%;
+  animation: pulseDot 1.5s infinite ease-in-out;
+}
+
+.loading-text-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+
+.loading-brand {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.loading-status {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.loading-bar {
+  width: 180px;
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-bar-fill {
+  width: 40%;
+  height: 100%;
+  background: var(--primary-600);
+  border-radius: 2px;
+  position: absolute;
+  animation: loadingSlide 1.4s infinite ease-in-out;
+}
+
+@keyframes loadingSlide {
+  0% { left: -40%; width: 30%; }
+  50% { left: 40%; width: 50%; }
+  100% { left: 100%; width: 30%; }
+}
+
+/* ==========================================================================
+   Global Auth Notification Banners
+   ========================================================================== */
+.auth-global-banner {
+  position: sticky;
+  top: 74px;
+  z-index: 990;
+  padding: 0.75rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.banner-success {
+  background: #ECFDF5;
+  border-bottom: 1px solid #A7F3D0;
+  color: #065F46;
+}
+
+.banner-error {
+  background: #FFFBEB;
+  border-bottom: 1px solid #FDE68A;
+  color: #92400E;
+}
+
+.banner-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.banner-error-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.banner-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.banner-action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.banner-action-btn {
+  padding: 0.35rem 0.85rem;
+  background: #92400E;
+  color: #FFFFFF;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.banner-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  transition: all 0.15s ease;
+}
+
+.banner-close-btn:hover {
+  background: rgba(0, 0, 0, 0.12);
+}

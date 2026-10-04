@@ -1,0 +1,650 @@
+/* ==========================================================================
+   CampusNest — Pune Campus Discovery & PG Radar Styles
+   ========================================================================== */
+
+.discovery-section {
+  padding: 80px 0 95px;
+  background-color: var(--bg-page);
+  position: relative;
+}
+
+/* Verification Mission Alert */
+.demo-disclaimer-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
+  border-radius: 16px;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
+}
+
+.disclaimer-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #DBEAFE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.disclaimer-icon {
+  width: 18px;
+  height: 18px;
+  color: #1D4ED8;
+}
+
+.disclaimer-text {
+  font-size: 0.84rem;
+  color: #1E3A8A;
+  line-height: 1.55;
+}
+
+/* Header Row */
+.discovery-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.discovery-titles {
+  max-width: 700px;
+}
+
+.discovery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--primary-700);
+  background: var(--primary-50);
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  margin-bottom: 0.85rem;
+}
+
+.discovery-main-title {
+  font-size: clamp(1.8rem, 3.2vw, 2.35rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-bottom: 0.65rem;
+}
+
+.discovery-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   ACTIVE CAMPUS ANCHOR SPOTLIGHT CARD (Requirement 6)
+   ========================================================================== */
+.active-anchor-spotlight {
+  margin-bottom: 3.5rem;
+}
+
+.spotlight-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
+  border-radius: 24px;
+  border: 1.5px solid rgba(99, 102, 241, 0.25);
+  box-shadow: 0 16px 40px -10px rgba(99, 102, 241, 0.12), 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  padding: 2rem 2.25rem;
+  position: relative;
+  text-align: left;
+}
+
+.spotlight-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #E2E8F0;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.spotlight-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: #EEF2FF;
+  border: 1px solid #C7D2FE;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+}
+
+.spotlight-live-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4F46E5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+  animation: pulseDot 2s infinite ease-in-out;
+}
+
+.spotlight-tag {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #3730A3;
+  letter-spacing: 0.04em;
+}
+
+.spotlight-code {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #4F46E5;
+  border-left: 1px solid #C7D2FE;
+  padding-left: 0.5rem;
+}
+
+.spotlight-website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-700);
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.spotlight-website-link:hover {
+  border-color: var(--primary-500);
+  color: var(--primary-600);
+  background: var(--primary-50);
+}
+
+.spotlight-body {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.spotlight-acronym {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--primary-700);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.spotlight-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.35;
+  margin-bottom: 0.75rem;
+}
+
+.spotlight-location-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  margin-bottom: 0.5rem;
+}
+
+.spotlight-loc-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #334155;
+}
+
+.spotlight-pincode {
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.spotlight-affil {
+  color: #64748B;
+  font-style: italic;
+  font-size: 0.75rem;
+}
+
+.spotlight-address {
+  font-size: 0.8125rem;
+  color: #64748B;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.spotlight-audit-panel {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 1.35rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.audit-panel-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #475569;
+}
+
+.audit-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.audit-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.spotlight-action-box {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.spotlight-alert-confirmed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  color: #065F46;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.spotlight-waitlist-form {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.spotlight-email-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  font-size: 0.8125rem;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.spotlight-email-input:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.spotlight-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 40px;
+  padding: 0 1rem;
+  background: var(--primary-600);
+  color: #FFFFFF;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.spotlight-submit-btn:hover {
+  background: var(--primary-700);
+}
+
+.spotlight-owner-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  background: #FFFFFF;
+  border: 1px dashed #CBD5E1;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.55rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.spotlight-owner-btn:hover {
+  border-color: var(--primary-500);
+  color: var(--primary-700);
+  background: #EEF2FF;
+}
+
+/* ==========================================================================
+   PUNE CAMPUS DIRECTORY & STREAM EXPLORER
+   ========================================================================== */
+.campus-directory-container {
+  margin-top: 1rem;
+}
+
+.directory-header-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.directory-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin-bottom: 0.25rem;
+}
+
+.directory-sub {
+  font-size: 0.875rem;
+  color: #64748B;
+  margin: 0;
+}
+
+.directory-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+  max-width: 360px;
+  width: 100%;
+}
+
+.directory-search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: #94A3B8;
+  pointer-events: none;
+}
+
+.directory-search-input {
+  width: 100%;
+  padding: 0.6rem 0.85rem 0.6rem 2.35rem;
+  border-radius: 10px;
+  border: 1px solid #CBD5E1;
+  background: #FFFFFF;
+  font-size: 0.8125rem;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.directory-search-input:focus {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+/* Filter Tabs */
+.discovery-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-surface);
+  padding: 0.35rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-xs);
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.filter-tab-btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.filter-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-subtle);
+}
+
+.filter-tab-btn.is-active {
+  background: var(--primary-600);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25);
+}
+
+/* 3-Column College Cards Grid */
+.colleges-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3.5rem;
+}
+
+.college-directory-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  padding: 1.35rem 1.45rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  text-align: left;
+}
+
+.college-directory-card:hover {
+  transform: translateY(-4px);
+  border-color: #CBD5E1;
+  box-shadow: 0 14px 30px -6px rgba(15, 23, 42, 0.09);
+}
+
+.college-directory-card.is-active-anchor {
+  border-color: var(--primary-500);
+  background: linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 100%);
+  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.18);
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.card-acronym-badge {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--primary-700);
+  background: var(--primary-50);
+  border: 1px solid var(--primary-100);
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+
+.card-area-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.card-college-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+  min-height: 2.6rem;
+}
+
+.card-affiliation-text {
+  font-size: 0.75rem;
+  color: #64748B;
+  font-style: italic;
+  margin-bottom: 0.75rem;
+  line-height: 1.35;
+}
+
+.card-categories-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.15rem;
+}
+
+.card-cat-pill {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #0369A1;
+  background: #E0F2FE;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.card-cat-more {
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: #64748B;
+  background: #F1F5F9;
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+}
+
+.card-footer-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #F1F5F9;
+}
+
+.card-institute-code {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+.card-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-700);
+  background: var(--primary-50);
+  border: 1px solid var(--primary-100);
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.card-select-btn:hover {
+  background: var(--primary-600);
+  color: #FFFFFF;
+  border-color: var(--primary-600);
+}
+
+.card-select-btn.btn-is-selected {
+  background: #10B981;
+  color: #FFFFFF;
+  border-color: #10B981;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 980px) {
+  .spotlight-body {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .colleges-cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .discovery-section {
+    padding: 50px 0 65px;
+  }
+
+  .spotlight-card {
+    padding: 1.35rem 1.15rem;
+    border-radius: 18px;
+  }
+
+  .spotlight-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .spotlight-waitlist-form {
+    flex-direction: column;
+  }
+
+  .spotlight-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .directory-header-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .directory-search-wrapper {
+    max-width: 100%;
+  }
+
+  .colleges-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
