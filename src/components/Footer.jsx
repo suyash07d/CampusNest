@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { IconGraduationCap, IconShield, IconMail, IconSparkles } from './Icons';
 import './Footer.css';
 
-export default function Footer({ onOpenOwnerModal, onOpenAuth }) {
+export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -69,6 +69,11 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth }) {
               <li>
                 <button type="button" className="footer-text-btn" onClick={onOpenAuth}>
                   Student / Host Login
+                </button>
+              </li>
+              <li>
+                <button type="button" className="footer-text-btn text-indigo-subtle" onClick={onOpenAdmin}>
+                  Admin Gateway
                 </button>
               </li>
               <li><a href="#owners" onClick={() => handleScrollTo('owners')}>Host Verification Standards</a></li>

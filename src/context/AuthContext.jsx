@@ -266,6 +266,53 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Dedicated Admin Sign In with authoritative database role verification
+  const signInAdmin = async ({ email, password }) => {
+    // 1. Authenticate with Supabase credentials
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data?.user) {
+      throw new Error('Authentication failed: No user record returned.');
+    }
+
+    // 2. Fetch authoritative profile directly from public.profiles
+    const { data: profileRow, error: profileErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .maybeSingle();
+
+    if (profileErr) {
+      await signOut();
+      throw new Error('Authorization check failed. Please check network connectivity.');
+    }
+
+    // 3. Strict Role Verification: MUST be 'admin'
+    if (!profileRow || profileRow.role !== 'admin') {
+      // Immediately revoke session to prevent any non-admin access
+      await signOut();
+      const detectedRole = profileRow?.role || 'user';
+      throw new Error(`Admin access required. Account authenticated as "${detectedRole}", but lacks administrative privileges.`);
+    }
+
+    setUser(data.user);
+    setSession(data.session);
+    setProfile(profileRow);
+
+    return {
+      user: data.user,
+      session: data.session,
+      profile: profileRow,
+    };
+  };
+
   // Sign out
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -287,6 +334,7 @@ export function AuthProvider({ children }) {
     session,
     profile,
     role,
+    isAdmin: profile?.role === 'admin',
     loading,
     isAuthenticated: !!user,
     authError,
@@ -295,6 +343,7 @@ export function AuthProvider({ children }) {
     clearAuthNotice: () => setAuthNotice(null),
     signUp,
     signIn,
+    signInAdmin,
     signOut,
     refreshProfile: () => user && fetchProfile(user.id, user),
   };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
@@ -13,21 +13,65 @@ import OwnerModal from './components/OwnerModal';
 import AuthModal from './components/AuthModal';
 import StudentDashboard from './components/StudentDashboard';
 import OwnerDashboard from './components/OwnerDashboard';
+import AdminLogin from './components/admin/AdminLogin';
+import AdminShell from './components/admin/AdminShell';
 import { IconGraduationCap, IconX, IconShield } from './components/Icons';
 import './App.css';
 
 function CampusNestContent() {
   const { 
     role, 
+    isAdmin,
+    profile,
     isAuthenticated, 
     loading, 
     authNotice, 
     clearAuthNotice, 
     authError, 
-    clearAuthError 
+    clearAuthError,
+    signInAdmin,
+    signOut
   } = useAuth();
 
-  // Navigation state:
+  // Pathname routing (/admin vs /)
+  const [pathname, setPathname] = useState(() => 
+    typeof window !== 'undefined' ? window.location.pathname : '/'
+  );
+  const [adminSecurityNotice, setAdminSecurityNotice] = useState('');
+
+  const navigateTo = useCallback((newPath) => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState(null, '', newPath);
+      setPathname(newPath);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setPathname(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Strict Admin Route Guard:
+  // If navigating to /admin while authenticated as non-admin (student/owner),
+  // immediately terminate the session and show clear security notice.
+  useEffect(() => {
+    let isMounted = true;
+    if (pathname === '/admin' && isAuthenticated && !isAdmin && !loading) {
+      signOut().then(() => {
+        if (isMounted) {
+          setAdminSecurityNotice(`Admin access required. Your ${role || 'non-admin'} session was safely terminated.`);
+        }
+      });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [pathname, isAuthenticated, isAdmin, loading, role, signOut]);
+
+  // Navigation state for public portal:
   // When authenticated, default view is 'dashboard' (for email confirmation & login).
   // Authenticated users can freely toggle to 'home' to explore PGs and back.
   // When unauthenticated, currentView is always 'home'.
@@ -85,6 +129,52 @@ function CampusNestContent() {
     setAuthModalState({ isOpen: false, initialMode: 'login', initialRole: 'student' });
   };
 
+  // -------------------------------------------------------------------------
+  // Dedicated Admin Route (/admin) with Strict Security Route Guard
+  // -------------------------------------------------------------------------
+  if (pathname === '/admin') {
+    if (loading) {
+      return (
+        <div className="auth-loading-screen" aria-label="Verifying administrative session">
+          <div className="auth-loading-card">
+            <div className="loading-logo-box">
+              <IconShield className="loading-cap-icon text-indigo" />
+              <div className="loading-dot-pulse" />
+            </div>
+            <div className="loading-text-stack">
+              <span className="loading-brand">Campus<span className="brand-highlight">Nest</span></span>
+              <span className="loading-status">Verifying administrative authorization...</span>
+            </div>
+            <div className="loading-bar">
+              <div className="loading-bar-fill" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (isAuthenticated && isAdmin) {
+      return (
+        <AdminShell 
+          profile={profile}
+          onSignOut={async () => {
+            await signOut();
+            setAdminSecurityNotice('Administrative session ended successfully.');
+          }}
+          onGoHome={() => navigateTo('/')}
+        />
+      );
+    }
+
+    return (
+      <AdminLogin 
+        onLogin={signInAdmin}
+        onGoHome={() => navigateTo('/')}
+        securityNotice={adminSecurityNotice}
+      />
+    );
+  }
+
   // Loading Screen while Supabase resolves session / email confirmation
   if (loading) {
     return (
@@ -116,6 +206,7 @@ function CampusNestContent() {
         currentView={currentView}
         onNavigateHome={() => setUserViewOverride('home')}
         onOpenDashboard={() => setUserViewOverride('dashboard')}
+        onOpenAdmin={() => navigateTo('/admin')}
       />
 
       {/* Global Confirmation / Notification Alert */}
@@ -219,6 +310,7 @@ function CampusNestContent() {
       <Footer 
         onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
         onOpenAuth={handleOpenLogin}
+        onOpenAdmin={() => navigateTo('/admin')}
       />
 
       {/* Interactive Modals with smooth exit transitions */}

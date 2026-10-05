@@ -9,7 +9,8 @@ import {
   IconX, 
   IconArrowRight, 
   IconLayoutDashboard, 
-  IconLogOut 
+  IconLogOut,
+  IconShield 
 } from './Icons';
 import './Navbar.css';
 
@@ -19,7 +20,8 @@ export default function Navbar({
   onScrollToDiscovery, 
   currentView = 'home',
   onNavigateHome,
-  onOpenDashboard 
+  onOpenDashboard,
+  onOpenAdmin 
 }) {
   const { user, profile, role, isAuthenticated, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
@@ -135,21 +137,36 @@ export default function Navbar({
               <div className="nav-auth-group">
                 {/* User Identity Chip */}
                 <div className="nav-user-chip" title={`${displayName} (${user?.email})`}>
-                  <div className={`user-chip-avatar ${role === 'owner' ? 'avatar-owner' : 'avatar-student'}`}>
-                    {role === 'owner' ? <IconBuilding className="w-3.5 h-3.5" /> : <IconGraduationCap className="w-3.5 h-3.5" />}
+                  <div className={`user-chip-avatar ${profile?.role === 'admin' ? 'avatar-admin' : role === 'owner' ? 'avatar-owner' : 'avatar-student'}`}>
+                    {profile?.role === 'admin' ? <IconShield className="w-3.5 h-3.5 text-indigo" /> : role === 'owner' ? <IconBuilding className="w-3.5 h-3.5" /> : <IconGraduationCap className="w-3.5 h-3.5" />}
                   </div>
                   <span className="user-chip-name">{displayName}</span>
                 </div>
 
+                {/* Admin Control Center Button if Admin */}
+                {profile?.role === 'admin' && onOpenAdmin && (
+                  <button 
+                    type="button"
+                    className="btn-dash-nav"
+                    onClick={onOpenAdmin}
+                    title="Access Admin Control Center"
+                  >
+                    <IconShield className="w-3.5 h-3.5 text-indigo" />
+                    <span>Control Center</span>
+                  </button>
+                )}
+
                 {/* Dashboard Button */}
-                <button 
-                  type="button"
-                  className={`btn-dash-nav ${currentView === 'dashboard' ? 'is-active' : ''}`}
-                  onClick={onOpenDashboard}
-                >
-                  <IconLayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Dashboard</span>
-                </button>
+                {profile?.role !== 'admin' && (
+                  <button 
+                    type="button"
+                    className={`btn-dash-nav ${currentView === 'dashboard' ? 'is-active' : ''}`}
+                    onClick={onOpenDashboard}
+                  >
+                    <IconLayoutDashboard className="w-3.5 h-3.5" />
+                    <span>Dashboard</span>
+                  </button>
+                )}
 
                 {/* Home/Explore Toggle */}
                 {currentView === 'dashboard' ? (
