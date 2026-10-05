@@ -33,22 +33,26 @@ function CampusNestContent() {
     signOut
   } = useAuth();
 
-  // Pathname routing (/admin vs /)
+  // Pathname routing (/admin vs /) with trailing-slash normalization
+  const normalizePath = (p) => (p || '').replace(/\/+$/, '') || '/';
+
   const [pathname, setPathname] = useState(() => 
-    typeof window !== 'undefined' ? window.location.pathname : '/'
+    typeof window !== 'undefined' ? (window.location.pathname.replace(/\/+$/, '') || '/') : '/'
   );
   const [adminSecurityNotice, setAdminSecurityNotice] = useState('');
 
   const navigateTo = useCallback((newPath) => {
     if (typeof window !== 'undefined') {
-      window.history.pushState(null, '', newPath);
-      setPathname(newPath);
+      const cleanPath = (newPath || '').replace(/\/+$/, '') || '/';
+      window.history.pushState(null, '', cleanPath);
+      setPathname(cleanPath);
     }
   }, []);
 
   useEffect(() => {
     const handlePopState = () => {
-      setPathname(window.location.pathname);
+      const cleanPath = (window.location.pathname || '').replace(/\/+$/, '') || '/';
+      setPathname(cleanPath);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -59,7 +63,8 @@ function CampusNestContent() {
   // immediately terminate the session and show clear security notice.
   useEffect(() => {
     let isMounted = true;
-    if (pathname === '/admin' && isAuthenticated && !isAdmin && !loading) {
+    const cleanPath = (pathname || '').replace(/\/+$/, '') || '/';
+    if (cleanPath === '/admin' && isAuthenticated && !isAdmin && !loading) {
       signOut().then(() => {
         if (isMounted) {
           setAdminSecurityNotice(`Admin access required. Your ${role || 'non-admin'} session was safely terminated.`);
@@ -132,7 +137,7 @@ function CampusNestContent() {
   // -------------------------------------------------------------------------
   // Dedicated Admin Route (/admin) with Strict Security Route Guard
   // -------------------------------------------------------------------------
-  if (pathname === '/admin') {
+  if (normalizePath(pathname) === '/admin') {
     if (loading) {
       return (
         <div className="auth-loading-screen" aria-label="Verifying administrative session">
