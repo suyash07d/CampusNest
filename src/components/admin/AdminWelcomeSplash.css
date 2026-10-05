@@ -1,0 +1,377 @@
+/* ==========================================================================
+   CampusNest Admin Personalized Welcome Experience Styles
+   ========================================================================== */
+
+.admin-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 15, 29, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 1.25rem;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Multi-Hue Ambient Gradient Backdrops */
+.welcome-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 640px;
+  height: 640px;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.18) 40%, transparent 70%);
+  filter: blur(70px);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: welcomeGlowPulse 6s ease-in-out infinite alternate;
+}
+
+.welcome-glow-secondary {
+  position: absolute;
+  top: 52%;
+  left: 48%;
+  transform: translate(-50%, -50%);
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle at center, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.12) 45%, transparent 70%);
+  filter: blur(60px);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: welcomeGlowPulse 8s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes welcomeGlowPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.92);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* Floating Ambient Particles Layer */
+.welcome-particles-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.welcome-micro-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(199, 210, 254, 0.9) 0%, rgba(129, 140, 248, 0.4) 70%, transparent 100%);
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.6);
+  pointer-events: none;
+}
+
+/* Glassmorphic Welcome Modal Card */
+.admin-welcome-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 580px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.75rem;
+  padding: 2.5rem 2.25rem 2rem;
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(99, 102, 241, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  text-align: center;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  cursor: default;
+}
+
+/* Special Easter Egg Glow Variant (for Vishal Bhutekar) */
+.admin-welcome-card.easter-egg-card {
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 
+    0 25px 60px -15px rgba(0, 0, 0, 0.85),
+    0 0 45px rgba(245, 158, 11, 0.16),
+    0 0 0 1px rgba(245, 158, 11, 0.25),
+    inset 0 1px 1px rgba(251, 191, 36, 0.25);
+}
+
+/* Card Badge Row */
+.welcome-card-badge-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.welcome-brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.welcome-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.welcome-easter-egg-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+}
+
+/* Waving Hand Hero */
+.welcome-emoji-hero {
+  margin: 0.25rem auto 1rem;
+  font-size: 3.5rem;
+  line-height: 1;
+  display: inline-block;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+}
+
+.wave-emoji {
+  display: inline-block;
+  transform-origin: 75% 75%;
+}
+
+/* Typography */
+.welcome-greeting-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.95rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #ffffff;
+  margin-bottom: 0.6rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  word-break: break-word;
+}
+
+.welcome-subgreeting-text {
+  font-size: 1.05rem;
+  color: #94a3b8;
+  margin-bottom: 1.75rem;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Admin Verification Pill */
+.welcome-operator-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  background: rgba(2, 6, 23, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.15rem;
+  padding: 0.85rem 1.15rem;
+  margin-bottom: 1.75rem;
+  text-align: left;
+}
+
+.operator-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+}
+
+.operator-text-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.operator-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.2rem;
+}
+
+.operator-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.operator-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.operator-email {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.operator-security-mark {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
+}
+
+/* Action Footer with Auto-Progress Bar */
+.welcome-action-footer {
+  width: 100%;
+}
+
+.welcome-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 1.15rem;
+}
+
+.welcome-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 50%, #10b981 100%);
+  border-radius: 9999px;
+}
+
+.welcome-footer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.welcome-timer-hint {
+  font-size: 0.825rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.btn-enter-control-center {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.38);
+}
+
+.btn-enter-control-center:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+}
+
+.btn-enter-control-center:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .admin-welcome-card {
+    padding: 1.75rem 1.25rem 1.5rem;
+    border-radius: 1.25rem;
+  }
+
+  .welcome-greeting-title {
+    font-size: 1.55rem;
+  }
+
+  .welcome-emoji-hero {
+    font-size: 2.85rem;
+  }
+
+  .welcome-subgreeting-text {
+    font-size: 0.925rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .welcome-operator-pill {
+    padding: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .operator-security-mark {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .welcome-footer-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .btn-enter-control-center {
+    width: 100%;
+    justify-content: center;
+  }
+}

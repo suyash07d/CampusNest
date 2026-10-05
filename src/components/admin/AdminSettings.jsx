@@ -3,15 +3,17 @@ import {
   IconCheck, 
   IconLock, 
   IconLogOut, 
-  IconExternalLink
+  IconExternalLink,
+  IconSparkles
 } from '../Icons';
 import './AdminShell.css';
 
-export default function AdminSettings({ profile, onSignOut, onGoHome }) {
-  const adminName = profile?.full_name || 'System Administrator';
-  const adminEmail = profile?.email || '';
+export default function AdminSettings({ profile, personalization, onSignOut, onGoHome, onReplayWelcome }) {
+  const adminName = personalization?.displayName || profile?.full_name || 'System Administrator';
+  const adminEmail = personalization?.email || profile?.email || '';
   const adminRole = profile?.role || 'admin';
   const adminId = profile?.id || '';
+  const adminBadge = personalization?.badge || 'System Administrator';
   const joinedDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'long',
@@ -37,7 +39,7 @@ export default function AdminSettings({ profile, onSignOut, onGoHome }) {
               <IconShield className="w-5 h-5 text-indigo" />
               <h3>Administrative Identity</h3>
             </div>
-            <span className="role-tag-admin">VERIFIED ADMIN</span>
+            <span className="role-tag-admin">{personalization?.isEasterEgg ? 'VIP ADMIN' : 'VERIFIED ADMIN'}</span>
           </div>
 
           <div className="settings-card-body">
@@ -50,6 +52,16 @@ export default function AdminSettings({ profile, onSignOut, onGoHome }) {
                 <span className="kv-key">Email Address</span>
                 <span className="kv-val">{adminEmail}</span>
               </div>
+              <div className="kv-row">
+                <span className="kv-key">Assigned Title</span>
+                <span className="kv-val">{adminBadge}</span>
+              </div>
+              {personalization?.isEasterEgg && (
+                <div className="kv-row">
+                  <span className="kv-key">VIP Easter Egg</span>
+                  <span className="kv-val text-amber font-semibold">Active: &quot;{personalization.welcomeGreeting}&quot;</span>
+                </div>
+              )}
               <div className="kv-row">
                 <span className="kv-key">System Role</span>
                 <span className="kv-val">
@@ -68,6 +80,16 @@ export default function AdminSettings({ profile, onSignOut, onGoHome }) {
             </div>
 
             <div className="settings-card-actions">
+              {onReplayWelcome && (
+                <button
+                  type="button"
+                  className="btn-replay-welcome-action"
+                  onClick={onReplayWelcome}
+                >
+                  <IconSparkles className="w-4 h-4 text-indigo" />
+                  <span>Preview Welcome Animation</span>
+                </button>
+              )}
               <button
                 type="button"
                 className="btn-danger-action"

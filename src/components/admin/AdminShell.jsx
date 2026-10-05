@@ -15,6 +15,8 @@ import AdminEnquiries from './AdminEnquiries';
 import AdminReports from './AdminReports';
 import AdminActivityAudit from './AdminActivityAudit';
 import AdminSettings from './AdminSettings';
+import AdminWelcomeSplash from './AdminWelcomeSplash';
+import { getAdminPersonalization } from '../../config/adminPersonalization';
 import { getOverviewMetrics } from '../../lib/adminService';
 import './AdminShell.css';
 
@@ -30,6 +32,30 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
   });
   const [toastNotice, setToastNotice] = useState(null);
   const [selectedPGForReview, setSelectedPGForReview] = useState(null);
+
+  // Personalized Administrator Identity & Welcome State
+  const personalization = getAdminPersonalization(profile);
+  const sessionKey = `cn_admin_welcome_seen_${profile?.id || profile?.email || 'admin'}`;
+  const [showWelcomeSplash, setShowWelcomeSplash] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !sessionStorage.getItem(sessionKey);
+  });
+
+  const handleDismissWelcome = () => {
+    setShowWelcomeSplash(false);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(sessionKey, 'true');
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(sessionKey);
+    }
+    if (onSignOut) {
+      await onSignOut();
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -119,6 +145,16 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
         )}
       </AnimatePresence>
 
+      {/* Personalized Welcome Experience Splash Overlay */}
+      <AnimatePresence>
+        {showWelcomeSplash && (
+          <AdminWelcomeSplash
+            personalization={personalization}
+            onDismiss={handleDismissWelcome}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="admin-layout-container">
         {/* Navigation Sidebar */}
         <AdminSidebar
@@ -129,7 +165,8 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
           }}
           counts={counts}
           profile={profile}
-          onSignOut={onSignOut}
+          personalization={personalization}
+          onSignOut={handleSignOut}
           onGoHome={onGoHome}
           isOpenMobile={mobileSidebarOpen}
           onCloseMobile={() => setMobileSidebarOpen(false)}
@@ -177,9 +214,9 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
               {/* Admin Avatar Chip */}
               <div className="header-admin-chip">
                 <div className="chip-avatar">
-                  {(profile?.full_name || 'A')[0].toUpperCase()}
+                  {(personalization?.displayName || profile?.full_name || 'A')[0].toUpperCase()}
                 </div>
-                <span className="chip-name">{profile?.full_name || 'Admin'}</span>
+                <span className="chip-name">{personalization?.displayName || profile?.full_name || 'Admin'}</span>
               </div>
             </div>
           </header>
@@ -188,6 +225,8 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
           <main className="admin-stage-viewport">
             {activeSection === 'overview' && (
               <AdminOverview
+                profile={profile}
+                personalization={personalization}
                 onNavigate={setActiveSection}
                 onReviewPG={handleReviewPG}
               />
@@ -232,8 +271,10 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
             {activeSection === 'settings' && (
               <AdminSettings
                 profile={profile}
-                onSignOut={onSignOut}
+                personalization={personalization}
+                onSignOut={handleSignOut}
                 onGoHome={onGoHome}
+                onReplayWelcome={() => setShowWelcomeSplash(true)}
               />
             )}
           </main>

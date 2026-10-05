@@ -20,6 +20,7 @@ export default function AdminSidebar({
   onSelectSection,
   counts = {},
   profile,
+  personalization,
   onSignOut,
   onGoHome,
   isOpenMobile,
@@ -78,8 +79,8 @@ export default function AdminSidebar({
     },
   ];
 
-  const adminName = profile?.full_name || 'System Admin';
-  const adminEmail = profile?.email || '';
+  const adminName = personalization?.displayName || profile?.full_name || 'System Admin';
+  const adminEmail = personalization?.email || profile?.email || '';
 
   return (
     <>
@@ -170,7 +171,7 @@ export default function AdminSidebar({
             <div className="identity-info-stack">
               <div className="identity-name-row">
                 <span className="admin-name" title={adminName}>{adminName}</span>
-                <span className="role-tag-admin">ADMIN</span>
+                <span className="role-tag-admin">{personalization?.isEasterEgg ? 'VIP ADMIN' : 'ADMIN'}</span>
               </div>
               <span className="admin-email" title={adminEmail}>{adminEmail}</span>
               <div className="identity-verified-pill">

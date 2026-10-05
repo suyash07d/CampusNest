@@ -24,7 +24,7 @@ import {
 } from '../../lib/adminService';
 import './AdminShell.css';
 
-export default function AdminOverview({ onNavigate, onReviewPG }) {
+export default function AdminOverview({ onNavigate, onReviewPG, profile, personalization }) {
   const [metrics, setMetrics] = useState({
     totalStudents: 0,
     totalOwners: 0,
@@ -196,6 +196,32 @@ export default function AdminOverview({ onNavigate, onReviewPG }) {
           <IconRefreshCw className={`w-4 h-4 ${refreshing ? 'spinner' : ''}`} />
           <span>{refreshing ? 'Syncing...' : 'Sync Telemetry'}</span>
         </button>
+      </div>
+
+      {/* Personalized Administrator Welcome Banner */}
+      <div className={`admin-welcome-hero-banner ${personalization?.isEasterEgg ? 'easter-egg-banner' : ''}`}>
+        <div className="welcome-hero-content">
+          <div className="welcome-hero-title-row">
+            <span className="welcome-hero-emoji">👋</span>
+            <h3 className="welcome-hero-heading">
+              {personalization?.welcomeGreeting || 'Welcome to CampusNest!'}
+            </h3>
+            {personalization?.isEasterEgg && (
+              <span className="welcome-hero-tag">VIP Easter Egg Active 😂</span>
+            )}
+            {personalization?.badge && (
+              <span className="welcome-hero-badge">{personalization.badge}</span>
+            )}
+          </div>
+          <p className="welcome-hero-subtext">
+            {personalization?.subGreeting || 'CampusNest Control Center is ready.'}
+            {' '}Active session for <strong className="text-white">{personalization?.displayName || profile?.full_name || 'Admin'}</strong> ({profile?.email || personalization?.email}). Database RLS actively enforced.
+          </p>
+        </div>
+        <div className="welcome-hero-status">
+          <div className="pulse-dot-green" />
+          <span>System Active</span>
+        </div>
       </div>
 
       {/* Primary Metrics Grid */}
