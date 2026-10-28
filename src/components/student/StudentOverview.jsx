@@ -8,17 +8,19 @@ import {
   IconArrowRight, 
   IconShield, 
   IconSparkles, 
-  IconCheck, 
-  IconUser, 
-  IconClock,
   IconSliders,
-  IconKey,
   IconX,
-  IconMapPin
+  IconMapPin,
+  IconCheck,
+  IconBuilding,
+  IconUser
 } from '../Icons';
-import StudentHousingJourney from './StudentHousingJourney';
+
 import StudentCampusRadar from './StudentCampusRadar';
+import StudentHousingJourney from './StudentHousingJourney';
 import StudentPreferencesMatrix from './StudentPreferencesMatrix';
+import StudentSaved from './StudentSaved';
+import StudentEnquiries from './StudentEnquiries';
 
 export default function StudentOverview({
   user,
@@ -29,10 +31,12 @@ export default function StudentOverview({
   dataLoading = false,
   onSelectTab,
   onBrowsePGs,
+  onRemoveFavourite
 }) {
-  const [activeModal, setActiveModal] = useState(null); // 'radar' | 'journey' | 'preferences' | null
+  // Active modal: 'radar' | 'journey' | 'preferences' | 'saved' | 'enquiries' | 'anchor' | null
+  const [activeModal, setActiveModal] = useState(null);
 
-  // Journey metrics
+  // Journey calculation
   const stage1Complete = Boolean(college?.id || college?.slug);
   const stage2Complete = favourites.length > 0;
   const stage3Complete = enquiries.length > 0;
@@ -40,13 +44,10 @@ export default function StudentOverview({
   const completedCount = [stage1Complete, stage2Complete, stage3Complete, stage4Complete].filter(Boolean).length;
   const progressPercent = Math.round((completedCount / 4) * 100);
 
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
-  const displayEmail = user?.email || profile?.email || '';
-  const displayPhone = profile?.phone || 'Not added';
-  const isVerified = profile?.is_verified ?? false;
   const collegeName = college?.shortName || college?.name || 'Pune Campus';
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
 
-  // Lock scroll when modal is active
+  // Lock body scroll during active popup
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') setActiveModal(null);
@@ -64,9 +65,9 @@ export default function StudentOverview({
   }, [activeModal]);
 
   return (
-    <div className="student-overview-container">
+    <div className="student-compact-overview-root">
       {/* ====================================================================
-          POPUP MODAL SYSTEM (Smooth Spring Animations on Card Click)
+          FULL-SCREEN INTERACTIVE POPUP MODALS (Triggered on Tile Click)
           ==================================================================== */}
       <AnimatePresence>
         {activeModal && (
@@ -79,24 +80,30 @@ export default function StudentOverview({
           >
             <motion.div 
               className="student-popup-modal-window"
-              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              initial={{ opacity: 0, scale: 0.94, y: 24 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.94, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 340 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Top Bar */}
+              {/* Modal Header */}
               <div className="student-popup-modal-header">
                 <div className="modal-title-stack">
                   <div className="modal-category-badge">
-                    {activeModal === 'radar' && <><IconCompass className="w-4 h-4 text-emerald" /><span>INTERACTIVE CAMPUS RADAR</span></>}
+                    {activeModal === 'radar' && <><IconCompass className="w-4 h-4 text-emerald" /><span>CAMPUS WALKING RADAR</span></>}
                     {activeModal === 'journey' && <><IconGraduationCap className="w-4 h-4 text-indigo" /><span>HOUSING JOURNEY ROADMAP</span></>}
                     {activeModal === 'preferences' && <><IconSliders className="w-4 h-4 text-purple" /><span>BUDGET &amp; AMENITIES MATRIX</span></>}
+                    {activeModal === 'saved' && <><IconHeart className="w-4 h-4 text-pink" /><span>MY SAVED ACCOMMODATIONS</span></>}
+                    {activeModal === 'enquiries' && <><IconMail className="w-4 h-4 text-amber" /><span>MY ENQUIRIES &amp; VISITS</span></>}
+                    {activeModal === 'anchor' && <><IconMapPin className="w-4 h-4 text-cyan" /><span>CAMPUS ANCHOR &amp; PROFILE</span></>}
                   </div>
                   <h3 className="modal-title-main">
                     {activeModal === 'radar' && `Walking Distance Radar — ${collegeName}`}
                     {activeModal === 'journey' && '4-Stage Student Housing Journey'}
                     {activeModal === 'preferences' && 'Living & Budget Preferences'}
+                    {activeModal === 'saved' && `Saved Accommodations (${favourites.length})`}
+                    {activeModal === 'enquiries' && `Active Host Visits & Inquiries (${enquiries.length})`}
+                    {activeModal === 'anchor' && `Campus Anchor — ${collegeName}`}
                   </h3>
                 </div>
 
@@ -105,13 +112,13 @@ export default function StudentOverview({
                   className="btn-popup-close"
                   onClick={() => setActiveModal(null)}
                   title="Close popup (Esc)"
-                  aria-label="Close"
+                  aria-label="Close popup"
                 >
                   <IconX className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Modal Component Body */}
+              {/* Modal Body */}
               <div className="student-popup-modal-body">
                 {activeModal === 'radar' && (
                   <StudentCampusRadar 
@@ -151,6 +158,92 @@ export default function StudentOverview({
                     }}
                   />
                 )}
+
+                {activeModal === 'saved' && (
+                  <StudentSaved 
+                    favourites={favourites}
+                    onRemoveFavourite={onRemoveFavourite}
+                    onNavigateDiscover={() => {
+                      setActiveModal(null);
+                      onSelectTab('discover');
+                    }}
+                    onBrowsePGs={() => {
+                      setActiveModal(null);
+                      onBrowsePGs?.();
+                    }}
+                  />
+                )}
+
+                {activeModal === 'enquiries' && (
+                  <StudentEnquiries 
+                    enquiries={enquiries}
+                    onNavigateDiscover={() => {
+                      setActiveModal(null);
+                      onSelectTab('discover');
+                    }}
+                    onBrowsePGs={() => {
+                      setActiveModal(null);
+                      onBrowsePGs?.();
+                    }}
+                  />
+                )}
+
+                {activeModal === 'anchor' && (
+                  <div className="modal-anchor-content">
+                    <div className="anchor-modal-card">
+                      <div className="anchor-modal-header">
+                        <div className="anchor-badge-circle">
+                          <IconBuilding className="w-6 h-6 text-indigo" />
+                        </div>
+                        <div>
+                          <h4 className="anchor-title">{college?.name || 'Select College Anchor'}</h4>
+                          <p className="anchor-location">📍 {college?.areaName || college?.areaSlug || 'Pune Campus'}</p>
+                        </div>
+                      </div>
+
+                      <div className="anchor-details-grid">
+                        <div className="anchor-detail-row">
+                          <span className="detail-label">Affiliation:</span>
+                          <span className="detail-value">{college?.affiliation || 'SPPU Verified Institute'}</span>
+                        </div>
+                        <div className="anchor-detail-row">
+                          <span className="detail-label">Student Name:</span>
+                          <span className="detail-value">{displayName}</span>
+                        </div>
+                        <div className="anchor-detail-row">
+                          <span className="detail-label">Walking Radius:</span>
+                          <span className="detail-value text-emerald">5m, 10m &amp; 15m calculated</span>
+                        </div>
+                      </div>
+
+                      <div className="anchor-modal-actions">
+                        <button 
+                          type="button" 
+                          className="btn-modal-action primary"
+                          onClick={() => {
+                            setActiveModal(null);
+                            onSelectTab('profile');
+                          }}
+                        >
+                          <IconUser className="w-4 h-4" />
+                          <span>Change College in Profile</span>
+                        </button>
+
+                        <button 
+                          type="button" 
+                          className="btn-modal-action secondary"
+                          onClick={() => {
+                            setActiveModal(null);
+                            onSelectTab('discover');
+                          }}
+                        >
+                          <IconCompass className="w-4 h-4" />
+                          <span>Find PGs Near This Campus</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -158,470 +251,242 @@ export default function StudentOverview({
       </AnimatePresence>
 
       {/* ====================================================================
-          1. COMPRESSED INTERACTIVE FEATURE HUB (Bite-sized, animated cards)
+          ULTRA-COMPACT APP BENTO GRID (Zero Endless Scrolling)
+          All 6 cards fit in a compact viewport; tapping any opens the modal!
           ==================================================================== */}
-      <section className="overview-compressed-hub" aria-label="Interactive Feature Hub">
-        <div className="compressed-hub-header">
-          <div>
-            <div className="section-eyebrow">FAST ACCESS DASHBOARD</div>
-            <h2 className="compressed-hub-title">
-              <IconSparkles className="w-4 h-4 text-indigo" />
-              <span>Campus Nest Feature Hub</span>
-            </h2>
-          </div>
-          <span className="compressed-hub-hint">Tap any box to expand full interactive view</span>
-        </div>
-
-        <div className="compressed-hub-grid">
-          {/* Card 1: Interactive Campus Radar Card */}
+      <section className="overview-bento-section" aria-label="Quick Hub Tiles">
+        <div className="bento-grid-container">
+          
+          {/* Card 1: Walking Radar */}
           <motion.div 
-            className="compressed-feature-card card-radar-glow"
-            whileHover={{ y: -4, scale: 1.015 }}
+            className="bento-tile tile-radar"
+            whileHover={{ y: -3, scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             onClick={() => setActiveModal('radar')}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('radar'); }}
           >
-            <div className="compressed-card-top">
-              <span className="compressed-card-badge badge-emerald">
+            <div className="tile-top-row">
+              <span className="tile-badge badge-emerald">
                 <span className="live-radar-dot" />
-                <span>CAMPUS RADAR</span>
+                <span>RADAR</span>
               </span>
-              <span className="compressed-expand-hint">↗ Tap to Open</span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
             </div>
 
-            <div className="card-center-preview">
-              {/* Mini Animated Radar Graphic */}
-              <div className="mini-radar-visual">
-                <div className="mini-radar-ring ring-3" />
-                <div className="mini-radar-ring ring-2" />
-                <div className="mini-radar-ring ring-1" />
-                <div className="mini-radar-scan-line" />
-                <div className="mini-radar-center-dot" />
-                <div className="mini-radar-ping ping-1" />
-                <div className="mini-radar-ping ping-2" />
+            <div className="tile-body-row">
+              <div className="tile-mini-radar-graphic">
+                <div className="radar-sweep-line" />
+                <div className="radar-ping-dot" />
               </div>
-
-              <div className="mini-radar-content">
-                <h3 className="compressed-card-title">Walking Distance Radar</h3>
-                <p className="compressed-card-desc">
-                  Honest walking minutes (5m, 10m, 15m) from <strong>{collegeName}</strong> gates.
-                </p>
-                <div className="mini-zone-pills">
-                  <span className="zone-pill pill-5m">5m (400m)</span>
-                  <span className="zone-pill pill-10m">10m (800m)</span>
-                  <span className="zone-pill pill-15m">15m (1.2km)</span>
-                </div>
+              <div className="tile-text-stack">
+                <h4 className="tile-title">Campus Walking Radar</h4>
+                <p className="tile-desc">5m, 10m, 15m perimeter from {collegeName} gates</p>
               </div>
             </div>
 
-            <div className="compressed-card-footer">
-              <span className="footer-action-text">Explore gate perimeter PGs</span>
-              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-emerald">● Live Walking Rings</span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
             </div>
           </motion.div>
 
-          {/* Card 2: Housing Journey Pipeline Card */}
+          {/* Card 2: Housing Journey */}
           <motion.div 
-            className="compressed-feature-card card-journey-glow"
-            whileHover={{ y: -4, scale: 1.015 }}
+            className="bento-tile tile-journey"
+            whileHover={{ y: -3, scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             onClick={() => setActiveModal('journey')}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('journey'); }}
           >
-            <div className="compressed-card-top">
-              <span className="compressed-card-badge badge-indigo">
-                <IconGraduationCap className="w-3.5 h-3.5" />
-                <span>HOUSING ROADMAP</span>
+            <div className="tile-top-row">
+              <span className="tile-badge badge-indigo">
+                <IconGraduationCap className="w-3 h-3" />
+                <span>ROADMAP</span>
               </span>
-              <span className="compressed-expand-hint">↗ Tap to Open</span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
             </div>
 
-            <div className="card-center-preview">
-              <div className="journey-summary-bar">
-                <div className="journey-summary-numbers">
-                  <span className="journey-stage-text">Stage {completedCount} of 4 Completed</span>
-                  <span className="journey-percent-text">{progressPercent}%</span>
+            <div className="tile-body-row">
+              <div className="tile-text-stack full-width">
+                <div className="journey-tile-progress-header">
+                  <h4 className="tile-title">Stage {completedCount} of 4 Completed</h4>
+                  <span className="journey-tile-percent">{progressPercent}%</span>
                 </div>
-                <div className="journey-mini-progress-track">
-                  <motion.div 
-                    className="journey-mini-progress-fill" 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                  />
+                <div className="journey-tile-bar-bg">
+                  <div className="journey-tile-bar-fill" style={{ width: `${progressPercent}%` }} />
                 </div>
-              </div>
-
-              <h3 className="compressed-card-title">4-Stage Move-In Pipeline</h3>
-              <p className="compressed-card-desc">
-                Gamified milestones from picking campus to zero-brokerage key handover.
-              </p>
-
-              <div className="journey-mini-steps-row">
-                <span className={`step-chip ${stage1Complete ? 'is-done' : ''}`}>01 Campus {stage1Complete ? '✓' : ''}</span>
-                <span className={`step-chip ${stage2Complete ? 'is-done' : ''}`}>02 Shortlist {stage2Complete ? '✓' : ''}</span>
-                <span className={`step-chip ${stage3Complete ? 'is-done' : ''}`}>03 Visits {stage3Complete ? '✓' : ''}</span>
-                <span className={`step-chip ${stage4Complete ? 'is-done' : ''}`}>04 Move-In</span>
+                <p className="tile-desc">Campus → Shortlist → Visits → Move-In</p>
               </div>
             </div>
 
-            <div className="compressed-card-footer">
-              <span className="footer-action-text">View full roadmap details</span>
-              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-indigo">Milestone Pipeline</span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
             </div>
           </motion.div>
 
-          {/* Card 3: Preferences & Budget Matrix Card */}
+          {/* Card 3: Living Preferences */}
           <motion.div 
-            className="compressed-feature-card card-pref-glow"
-            whileHover={{ y: -4, scale: 1.015 }}
+            className="bento-tile tile-preferences"
+            whileHover={{ y: -3, scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             onClick={() => setActiveModal('preferences')}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('preferences'); }}
           >
-            <div className="compressed-card-top">
-              <span className="compressed-card-badge badge-purple">
-                <IconSliders className="w-3.5 h-3.5" />
-                <span>LIVING MATRIX</span>
+            <div className="tile-top-row">
+              <span className="tile-badge badge-purple">
+                <IconSliders className="w-3 h-3" />
+                <span>MATRIX</span>
               </span>
-              <span className="compressed-expand-hint">↗ Tap to Open</span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
             </div>
 
-            <div className="card-center-preview">
-              <h3 className="compressed-card-title">Living &amp; Budget Matrix</h3>
-              <p className="compressed-card-desc">
-                Tailor accommodation rates, mess food, and room amenities.
-              </p>
-
-              <div className="pref-mini-chips-grid">
-                <span className="pref-mini-chip">💰 ₹8k – ₹13k/mo</span>
-                <span className="pref-mini-chip">📶 High-Speed Wi-Fi</span>
-                <span className="pref-mini-chip">🚿 Attached Bath</span>
-                <span className="pref-mini-chip">🌙 Flexible Curfew</span>
+            <div className="tile-body-row">
+              <div className="tile-text-stack">
+                <h4 className="tile-title">Budget &amp; Amenities</h4>
+                <p className="tile-desc">₹8k – ₹13k/mo • Wi-Fi • Food • Curfew</p>
               </div>
             </div>
 
-            <div className="compressed-card-footer">
-              <span className="footer-action-text">Customize budget &amp; amenities</span>
-              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-purple">Filter By Lifestyle</span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
             </div>
           </motion.div>
-        </div>
-      </section>
 
-      {/* ====================================================================
-          2. QUICK ACTIONS SHORTCUT BAR (Compact 4-column strip)
-          ==================================================================== */}
-      <section className="overview-quick-strip" aria-label="Campus Nest Shortcuts">
-        <button 
-          type="button" 
-          className="quick-strip-btn btn-strip-discover"
-          onClick={() => onSelectTab('discover')}
-        >
-          <div className="strip-icon-box bg-indigo-glow">
-            <IconCompass className="w-4 h-4 text-indigo" />
-          </div>
-          <div className="strip-text-stack">
-            <strong>Discover PGs</strong>
-            <span>Verified near campus</span>
-          </div>
-        </button>
-
-        <button 
-          type="button" 
-          className="quick-strip-btn btn-strip-colleges"
-          onClick={() => onSelectTab('discover')}
-        >
-          <div className="strip-icon-box bg-emerald-glow">
-            <IconGraduationCap className="w-4 h-4 text-emerald" />
-          </div>
-          <div className="strip-text-stack">
-            <strong>45+ Colleges</strong>
-            <span>Pune campuses</span>
-          </div>
-        </button>
-
-        <button 
-          type="button" 
-          className="quick-strip-btn btn-strip-saved"
-          onClick={() => onSelectTab('saved')}
-        >
-          <div className="strip-icon-box bg-pink-glow">
-            <IconHeart className="w-4 h-4 text-pink" />
-          </div>
-          <div className="strip-text-stack">
-            <strong>Saved PGs ({favourites.length})</strong>
-            <span>Compare shortlists</span>
-          </div>
-        </button>
-
-        <button 
-          type="button" 
-          className="quick-strip-btn btn-strip-enquiries"
-          onClick={() => onSelectTab('enquiries')}
-        >
-          <div className="strip-icon-box bg-amber-glow">
-            <IconMail className="w-4 h-4 text-amber" />
-          </div>
-          <div className="strip-text-stack">
-            <strong>Enquiries ({enquiries.length})</strong>
-            <span>Visits &amp; messages</span>
-          </div>
-        </button>
-      </section>
-
-      {/* ====================================================================
-          3. MAIN DASHBOARD SPLIT VIEW: Saved Accommodations & Activity
-          ==================================================================== */}
-      <div className="overview-two-col-layout">
-        {/* Left Column: Saved PGs & Recent Enquiries */}
-        <div className="overview-col-main">
-          {/* Section: Saved PGs */}
-          <section className="overview-panel-card">
-            <div className="panel-card-header">
-              <div className="panel-header-title">
-                <IconHeart className="w-5 h-5 text-pink" />
-                <h3>Saved Accommodations ({favourites.length})</h3>
-              </div>
-              {favourites.length > 0 && (
-                <button 
-                  type="button" 
-                  className="panel-view-all-btn"
-                  onClick={() => onSelectTab('saved')}
-                >
-                  <span>View All</span>
-                  <IconArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
+          {/* Card 4: Saved Accommodations */}
+          <motion.div 
+            className="bento-tile tile-saved"
+            whileHover={{ y: -3, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('saved')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('saved'); }}
+          >
+            <div className="tile-top-row">
+              <span className="tile-badge badge-pink">
+                <IconHeart className="w-3 h-3" />
+                <span>SAVED ({favourites.length})</span>
+              </span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
             </div>
 
-            {favourites.length === 0 ? (
-              <div className="dashboard-empty-state">
-                <div className="empty-state-icon-box bg-pink-glow">
-                  <IconHeart className="w-5 h-5 text-pink" />
-                </div>
-                <h4 className="empty-state-title">Your PG Wishlist is Empty</h4>
-                <p className="empty-state-text">
-                  Bookmark verified student hostels near your campus to compare room rates, food options, and gate walking times.
+            <div className="tile-body-row">
+              <div className="tile-text-stack">
+                <h4 className="tile-title">Saved PG Wishlist</h4>
+                <p className="tile-desc">
+                  {favourites.length > 0 
+                    ? `${favourites.length} accommodation${favourites.length > 1 ? 's' : ''} bookmarked` 
+                    : 'Bookmark PGs near campus to compare'}
                 </p>
-                <div className="empty-state-actions">
-                  <button 
-                    type="button" 
-                    className="btn-empty-cta primary"
-                    onClick={() => onSelectTab('discover')}
-                  >
-                    <IconCompass className="w-4 h-4" />
-                    <span>Discover PGs Near Campus</span>
-                  </button>
-                </div>
               </div>
-            ) : (
-              <div className="overview-items-preview">
-                {favourites.slice(0, 3).map((fav) => (
-                  <div key={fav.id} className="overview-item-row">
-                    <div className="item-row-info">
-                      <h4 className="item-row-title">{fav.pg?.name || 'Verified PG Accommodation'}</h4>
-                      <p className="item-row-sub">
-                        📍 {fav.pg?.areas?.name || 'Pune'} • Starting ₹{fav.pg?.starting_monthly_rent?.toLocaleString('en-IN') || '—'}/mo
-                      </p>
-                    </div>
-                    <button 
-                      type="button" 
-                      className="btn-item-action"
-                      onClick={() => onSelectTab('saved')}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Section: Recent Enquiries */}
-          <section className="overview-panel-card">
-            <div className="panel-card-header">
-              <div className="panel-header-title">
-                <IconMail className="w-5 h-5 text-amber" />
-                <h3>Recent Enquiries &amp; Visits ({enquiries.length})</h3>
-              </div>
-              {enquiries.length > 0 && (
-                <button 
-                  type="button" 
-                  className="panel-view-all-btn"
-                  onClick={() => onSelectTab('enquiries')}
-                >
-                  <span>View All</span>
-                  <IconArrowRight className="w-3.5 h-3.5" />
-                </button>
-              )}
             </div>
 
-            {enquiries.length === 0 ? (
-              <div className="dashboard-empty-state">
-                <div className="empty-state-icon-box bg-amber-glow">
-                  <IconMail className="w-5 h-5 text-amber" />
-                </div>
-                <h4 className="empty-state-title">No Active Visit Requests</h4>
-                <p className="empty-state-text">
-                  Direct host inquiries and campus visit bookings will be tracked here with zero middlemen brokerage.
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-pink">
+                {favourites.length > 0 ? 'Review & Compare' : 'Explore Accommodations'}
+              </span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
+            </div>
+          </motion.div>
+
+          {/* Card 5: Enquiries & Visits */}
+          <motion.div 
+            className="bento-tile tile-enquiries"
+            whileHover={{ y: -3, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('enquiries')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('enquiries'); }}
+          >
+            <div className="tile-top-row">
+              <span className="tile-badge badge-amber">
+                <IconMail className="w-3 h-3" />
+                <span>ENQUIRIES ({enquiries.length})</span>
+              </span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
+            </div>
+
+            <div className="tile-body-row">
+              <div className="tile-text-stack">
+                <h4 className="tile-title">Visits &amp; Direct Enquiries</h4>
+                <p className="tile-desc">
+                  {enquiries.length > 0 
+                    ? `${enquiries.length} active visit${enquiries.length > 1 ? 's' : ''} in progress`
+                    : 'Zero-brokerage host booking inquiries'}
                 </p>
-                <div className="empty-state-actions">
-                  <button 
-                    type="button" 
-                    className="btn-empty-cta primary"
-                    onClick={() => onSelectTab('discover')}
-                  >
-                    <IconCompass className="w-4 h-4" />
-                    <span>Find PGs to Enquire</span>
-                  </button>
-                </div>
               </div>
-            ) : (
-              <div className="overview-items-preview">
-                {enquiries.slice(0, 3).map((enq) => (
-                  <div key={enq.id} className="overview-item-row">
-                    <div className="item-row-info">
-                      <div className="item-row-title-badge">
-                        <h4 className="item-row-title">{enq.pg?.name || 'PG Visit Request'}</h4>
-                        <span className={`status-badge badge-${enq.status || 'pending'}`}>
-                          {enq.status === 'visit_scheduled' ? 'Visit Scheduled' : enq.status || 'Pending'}
-                        </span>
-                      </div>
-                      <p className="item-row-sub">
-                        {enq.visit_date ? `Scheduled for: ${enq.visit_date}` : 'Awaiting host confirmation'}
-                      </p>
-                    </div>
-                    <button 
-                      type="button" 
-                      className="btn-item-action"
-                      onClick={() => onSelectTab('enquiries')}
-                    >
-                      Track
-                    </button>
-                  </div>
-                ))}
+            </div>
+
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-amber">
+                {enquiries.length > 0 ? 'Track Status' : 'Book a Property Tour'}
+              </span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
+            </div>
+          </motion.div>
+
+          {/* Card 6: Campus Anchor */}
+          <motion.div 
+            className="bento-tile tile-anchor"
+            whileHover={{ y: -3, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('anchor')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('anchor'); }}
+          >
+            <div className="tile-top-row">
+              <span className="tile-badge badge-cyan">
+                <IconMapPin className="w-3 h-3" />
+                <span>CAMPUS ANCHOR</span>
+              </span>
+              <span className="tile-expand-tag">↗ Tap to Open</span>
+            </div>
+
+            <div className="tile-body-row">
+              <div className="tile-text-stack">
+                <h4 className="tile-title">{collegeName}</h4>
+                <p className="tile-desc">
+                  {college?.areaName ? `📍 ${college.areaName} • SPPU Verified` : 'Anchor your university gates'}
+                </p>
               </div>
-            )}
-          </section>
+            </div>
+
+            <div className="tile-footer-row">
+              <span className="tile-metric-highlight text-cyan">Change / Verify Campus</span>
+              <span className="tile-action-arrow"><IconArrowRight className="w-3.5 h-3.5" /></span>
+            </div>
+          </motion.div>
+
         </div>
 
-        {/* Right Column: College Anchor & Profile Summary */}
-        <aside className="overview-col-sidebar">
-          {/* College Anchor Card */}
-          <section className="overview-sidebar-card college-anchor-card">
-            <div className="sidebar-card-badge">
-              <IconGraduationCap className="w-4 h-4 text-indigo" />
-              <span>Campus Anchor</span>
-            </div>
+        {/* Compact Single-Row Quick Action Bar */}
+        <div className="overview-bottom-action-bar">
+          <button 
+            type="button" 
+            className="btn-compact-discover-hero"
+            onClick={() => onSelectTab('discover')}
+          >
+            <IconCompass className="w-4 h-4" />
+            <span>Discover Verified PGs Near {collegeName}</span>
+            <IconArrowRight className="w-4 h-4 icon-arrow" />
+          </button>
 
-            {college ? (
-              <div className="college-anchor-body">
-                <h4 className="college-anchor-name">{college.name}</h4>
-                <div className="college-anchor-meta">
-                  <span className="anchor-tag">📍 {college.areaName || college.areaSlug}</span>
-                  <span className="anchor-tag">🏛️ {college.shortName}</span>
-                </div>
-                <p className="college-anchor-note">
-                  {college.affiliation || 'SPPU Verified Institute'}
-                </p>
-                <div className="college-anchor-footer">
-                  <button 
-                    type="button" 
-                    className="btn-anchor-action"
-                    onClick={() => onSelectTab('profile')}
-                  >
-                    Change College
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn-anchor-search"
-                    onClick={() => onSelectTab('discover')}
-                  >
-                    <IconCompass className="w-3.5 h-3.5" />
-                    <span>Explore PGs</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="college-anchor-empty">
-                <h4 className="college-anchor-name">No Campus Selected</h4>
-                <p className="college-anchor-note">
-                  Pick your university to see accommodations measured by exact gate walking minutes.
-                </p>
-                <button 
-                  type="button" 
-                  className="btn-anchor-select"
-                  onClick={() => onSelectTab('profile')}
-                >
-                  <IconSparkles className="w-4 h-4" />
-                  <span>Select Your College</span>
-                </button>
-              </div>
-            )}
-          </section>
-
-          {/* Profile Summary Card */}
-          <section className="overview-sidebar-card profile-summary-card">
-            <div className="profile-summary-header">
-              <div className="profile-avatar-circle">
-                {(displayName[0] || 'S').toUpperCase()}
-              </div>
-              <div className="profile-summary-names">
-                <h4 className="profile-name">{displayName}</h4>
-                <span className="profile-email" title={displayEmail}>{displayEmail}</span>
-              </div>
-            </div>
-
-            <div className="profile-summary-rows">
-              <div className="profile-summary-row">
-                <span className="row-label">Verification:</span>
-                <span className={`row-value ${isVerified ? 'text-success' : 'text-neutral'}`}>
-                  {isVerified ? '✓ Verified Student' : 'Active Account'}
-                </span>
-              </div>
-
-              <div className="profile-summary-row">
-                <span className="row-label">Contact:</span>
-                <span className="row-value">{displayPhone}</span>
-              </div>
-
-              <div className="profile-summary-row">
-                <span className="row-label">City Hub:</span>
-                <span className="row-value">Pune / Maharashtra</span>
-              </div>
-            </div>
-
-            <button 
-              type="button" 
-              className="btn-profile-edit"
-              onClick={() => onSelectTab('profile')}
-            >
-              <IconUser className="w-4 h-4" />
-              <span>Edit Profile &amp; Preferences</span>
-            </button>
-          </section>
-
-          {/* Trust Value Box */}
-          <div className="overview-trust-box">
-            <div className="trust-box-header">
-              <IconShield className="w-4 h-4 text-emerald" />
-              <span>Student Protection Guarantee</span>
-            </div>
-            <ul className="trust-box-list">
-              <li><IconCheck className="w-3.5 h-3.5 text-emerald" /> 100% Zero Brokerage to Students</li>
-              <li><IconCheck className="w-3.5 h-3.5 text-emerald" /> Honest Gate Walking Distances</li>
-              <li><IconCheck className="w-3.5 h-3.5 text-emerald" /> Direct Contact with Verified Hosts</li>
-            </ul>
+          <div className="overview-compact-trust-tag">
+            <IconShield className="w-4 h-4 text-emerald" />
+            <span>100% Zero Brokerage to Students • Direct Host Verification</span>
           </div>
-        </aside>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

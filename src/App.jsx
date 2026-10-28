@@ -316,12 +316,14 @@ function CampusNestContent() {
         )}
       </main>
 
-      {/* 8. Footer */}
-      <Footer 
-        onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
-        onOpenAuth={handleOpenLogin}
-        onOpenAdmin={() => navigateTo('/admin')}
-      />
+      {/* 8. Footer (Only for public landing views, hidden in dashboard for zero-scroll app experience) */}
+      {currentView !== 'dashboard' && (
+        <Footer 
+          onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+          onOpenAuth={handleOpenLogin}
+          onOpenAdmin={() => navigateTo('/admin')}
+        />
+      )}
 
       {/* Interactive Modals with smooth exit transitions */}
       <AnimatePresence>

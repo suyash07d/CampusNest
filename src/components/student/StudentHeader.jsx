@@ -3,11 +3,10 @@ import { motion } from 'motion/react';
 import { 
   IconGraduationCap, 
   IconShield, 
-  IconMail, 
-  IconMapPin, 
   IconCheck, 
   IconSparkles,
-  IconClock
+  IconHeart,
+  IconMail
 } from '../Icons';
 
 export default function StudentHeader({ 
@@ -22,7 +21,6 @@ export default function StudentHeader({
   const displayEmail = user?.email || profile?.email || '';
   const isVerified = profile?.is_verified ?? false;
 
-  // Time-aware greeting
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good morning';
@@ -30,115 +28,92 @@ export default function StudentHeader({
     return 'Good evening';
   }, []);
 
+  const initial = (displayName[0] || 'S').toUpperCase();
+
   return (
     <motion.header 
-      className="student-header-hero"
-      initial={{ opacity: 0, y: 14 }}
+      className="student-header-compact-bar"
+      initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.25 }}
     >
-      <div className="header-hero-glow" aria-hidden="true" />
-      
-      <div className="header-hero-content">
-        {/* Top Badges Row */}
-        <div className="header-badges-row">
-          <div className="hero-role-pill">
-            <IconGraduationCap className="w-4 h-4 text-indigo" />
-            <span>Student Dashboard</span>
-          </div>
-
-          {isVerified ? (
-            <div className="hero-verified-pill is-verified">
-              <IconCheck className="w-3.5 h-3.5 text-emerald" />
-              <span>Verified Student Account</span>
-            </div>
-          ) : (
-            <div className="hero-verified-pill is-pending">
-              <IconShield className="w-3.5 h-3.5" />
-              <span>Student Account Active</span>
-            </div>
-          )}
-
-          <div className="hero-season-pill">
-            <IconClock className="w-3.5 h-3.5 text-amber" />
-            <span>2026 Academic Season</span>
-          </div>
+      {/* Left: Avatar + Greeting + College */}
+      <div className="compact-header-left">
+        <div className="compact-avatar-circle" title={displayEmail}>
+          <span>{initial}</span>
+          {isVerified && <span className="compact-avatar-check" title="Verified Student">✓</span>}
         </div>
 
-        {/* Main Title & Subtitle */}
-        <div className="header-title-block">
-          <h1 className="header-main-title">
-            {greeting}, <span className="title-name-gradient">{displayName}</span>
-          </h1>
-          <p className="header-lead-desc">
-            CampusNest calculates honest walking minutes from your college gates so you can discover verified PGs with zero brokerage.
-          </p>
-        </div>
-
-        {/* Student Meta Details Strip */}
-        <div className="header-meta-strip">
-          <div className="meta-strip-item">
-            <IconMail className="w-4 h-4 meta-item-icon" />
-            <span className="meta-item-text" title={displayEmail}>{displayEmail}</span>
+        <div className="compact-user-info">
+          <div className="compact-greeting-row">
+            <span className="compact-greeting-prefix">{greeting},</span>
+            <strong className="compact-user-name">{displayName}</strong>
+            {isVerified ? (
+              <span className="compact-verified-tag" title="Verified Account">
+                <IconCheck className="w-3 h-3" />
+                <span>Verified</span>
+              </span>
+            ) : (
+              <span className="compact-verified-tag pending" title="Active Account">
+                <IconShield className="w-3 h-3" />
+                <span>Student</span>
+              </span>
+            )}
           </div>
 
-          <div className="meta-strip-item">
-            <IconMapPin className="w-4 h-4 meta-item-icon" />
-            <span className="meta-item-text">Pune, Maharashtra</span>
+          <div className="compact-sub-row">
+            {college ? (
+              <button 
+                type="button" 
+                className="compact-college-pill"
+                onClick={() => onSelectTab && onSelectTab('profile')}
+                title="Change active college anchor"
+              >
+                <IconGraduationCap className="w-3.5 h-3.5 text-indigo" />
+                <span>{college.shortName || college.name}</span>
+                <span className="pill-area-sub">({college.areaName || college.areaSlug})</span>
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="compact-college-pill unselected"
+                onClick={() => onSelectTab && onSelectTab('profile')}
+              >
+                <IconSparkles className="w-3.5 h-3.5 text-amber" />
+                <span>+ Set College Anchor</span>
+              </button>
+            )}
           </div>
-
-          {college ? (
-            <button 
-              type="button" 
-              className="meta-strip-college-chip"
-              onClick={() => onSelectTab && onSelectTab('profile')}
-              title="Click to view college details"
-            >
-              <IconSparkles className="w-3.5 h-3.5 text-indigo" />
-              <span className="college-chip-title">Anchor: <strong>{college.shortName || college.name}</strong></span>
-              <span className="college-chip-area">({college.areaName || college.areaSlug})</span>
-            </button>
-          ) : (
-            <button 
-              type="button" 
-              className="meta-strip-college-chip is-unselected"
-              onClick={() => onSelectTab && onSelectTab('profile')}
-              title="Select your college anchor"
-            >
-              <IconSparkles className="w-3.5 h-3.5 text-amber" />
-              <span className="college-chip-action">+ Select College Anchor</span>
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Header Quick Counter Stats */}
-      <div className="header-stats-panel">
+      {/* Right: Quick Stat Chips */}
+      <div className="compact-header-right">
         <button 
           type="button" 
-          className="header-stat-box"
+          className="compact-stat-chip chip-saved"
           onClick={() => onSelectTab && onSelectTab('saved')}
+          title="View Saved Accommodations"
         >
-          <span className="stat-number">{savedCount}</span>
-          <span className="stat-label">Saved PGs</span>
+          <IconHeart className="w-3.5 h-3.5 text-pink" />
+          <span className="chip-count">{savedCount}</span>
+          <span className="chip-label">Saved</span>
         </button>
-
-        <div className="stat-divider" />
 
         <button 
           type="button" 
-          className="header-stat-box"
+          className="compact-stat-chip chip-enquiries"
           onClick={() => onSelectTab && onSelectTab('enquiries')}
+          title="Track Enquiries & Visits"
         >
-          <span className="stat-number">{enquiriesCount}</span>
-          <span className="stat-label">Enquiries</span>
+          <IconMail className="w-3.5 h-3.5 text-amber" />
+          <span className="chip-count">{enquiriesCount}</span>
+          <span className="chip-label">Visits</span>
         </button>
 
-        <div className="stat-divider" />
-
-        <div className="header-stat-box status-indicator-box">
-          <span className="stat-pulse-dot" />
-          <span className="stat-label">Zero Brokerage</span>
+        <div className="compact-stat-chip chip-zero-brokerage">
+          <span className="pulse-dot-green" />
+          <span className="chip-label">Zero Brokerage</span>
         </div>
       </div>
     </motion.header>

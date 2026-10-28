@@ -151,6 +151,7 @@ export default function StudentDashboard({ onBrowsePGs }) {
                   dataLoading={dataLoading}
                   onSelectTab={setActiveTab}
                   onBrowsePGs={onBrowsePGs}
+                  onRemoveFavourite={handleRemoveFavourite}
                 />
               </motion.div>
             )}
