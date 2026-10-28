@@ -23,6 +23,7 @@ function CampusNestContent() {
     role, 
     isAdmin,
     profile,
+    session,
     isAuthenticated, 
     loading, 
     authNotice, 
@@ -178,6 +179,7 @@ function CampusNestContent() {
       return (
         <AdminShell 
           profile={profile}
+          accessToken={session?.access_token}
           onSignOut={async () => {
             await signOut();
             setAdminSecurityNotice('Administrative session ended successfully.');

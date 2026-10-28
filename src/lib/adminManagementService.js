@@ -1,10 +1,7 @@
 import { supabase } from './supabase.js';
 
-async function callAdminManagement(action, payload = {}) {
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  const accessToken = session?.access_token;
-
-  if (sessionError || !accessToken) {
+async function callAdminManagement(action, payload = {}, accessToken) {
+  if (!accessToken) {
     throw new Error('Your administrator session has expired. Sign out and sign back in, then try again.');
   }
 
@@ -35,14 +32,14 @@ async function callAdminManagement(action, payload = {}) {
   return data;
 }
 
-export async function listAdministrators() {
-  const data = await callAdminManagement('list');
+export async function listAdministrators(accessToken) {
+  const data = await callAdminManagement('list', {}, accessToken);
   return data.administrators || [];
 }
 
-export async function inviteAdministrator({ fullName, email }) {
+export async function inviteAdministrator({ fullName, email }, accessToken) {
   return callAdminManagement('invite', {
     full_name: fullName.trim(),
     email: email.trim().toLowerCase(),
-  });
+  }, accessToken);
 }
