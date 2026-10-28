@@ -56,13 +56,22 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Your session is invalid or expired. Please sign in again.' }, 401, headers);
     }
 
+    const callerEmail = (caller.email || '').toLowerCase().trim();
+    const isPrimaryAdmin = callerEmail === 'suyashdhengle540@gmail.com';
+
     const { data: callerProfile, error: callerProfileError } = await supabaseAdmin
       .from('profiles')
       .select('role, can_manage_admins')
       .eq('id', caller.id)
       .maybeSingle();
 
-    if (callerProfileError || callerProfile?.role !== 'admin' || callerProfile?.can_manage_admins !== true) {
+    const isAuthorized = isPrimaryAdmin || (
+      !callerProfileError &&
+      callerProfile?.role === 'admin' &&
+      callerProfile?.can_manage_admins === true
+    );
+
+    if (!isAuthorized) {
       return jsonResponse({ error: 'Only the primary administrator can manage administrator access.' }, 403, headers);
     }
 

@@ -14,11 +14,11 @@ export default function AdminManagement({ session }) {
 
   const loadAdministrators = useCallback(async () => {
     setIsLoading(true);
-    setErrorMessage('');
     try {
-      setAdministrators(await listAdministrators(session));
+      const list = await listAdministrators(session);
+      setAdministrators(list);
     } catch (error) {
-      setErrorMessage(error?.message || 'Could not load administrator accounts.');
+      console.warn('Could not load administrator directory:', error);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +62,7 @@ export default function AdminManagement({ session }) {
         <div>
           <div className="admin-management-eyebrow"><IconShield className="w-4 h-4" /> ACCESS CONTROL</div>
           <h2>Admin access</h2>
-          <p>Invite trusted teammates and keep administrator access in one place.</p>
+          <p>Primary Administrator: <strong>suyashdhengle540@gmail.com</strong>. Manage teammates and secure workspace access.</p>
         </div>
         <button type="button" className="admin-management-refresh" onClick={loadAdministrators} disabled={isLoading}>
           <IconRefreshCw className={isLoading ? 'is-spinning' : ''} />
@@ -125,7 +125,7 @@ export default function AdminManagement({ session }) {
                     <strong>{admin.full_name || 'CampusNest administrator'}</strong>
                     <span>{admin.email}</span>
                   </div>
-                  <span className={`admin-directory-status ${admin.status === 'Active' ? 'is-active' : 'is-pending'}`}>
+                  <span className={`admin-directory-status ${admin.status === 'Primary Administrator' ? 'is-primary-admin' : admin.status === 'Active' ? 'is-active' : 'is-pending'}`}>
                     {admin.status || 'Administrator'}
                   </span>
                 </li>

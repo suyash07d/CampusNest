@@ -302,6 +302,13 @@
   color: #6ee7b7;
 }
 
+.admin-directory-status.is-primary-admin {
+  border-color: rgba(165, 180, 252, 0.4);
+  background: rgba(99, 102, 241, 0.18);
+  color: #c7d2fe;
+  font-weight: 800;
+}
+
 .admin-directory-status.is-pending {
   border-color: rgba(251, 191, 36, 0.24);
   background: rgba(245, 158, 11, 0.1);

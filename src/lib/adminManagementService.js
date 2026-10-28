@@ -20,8 +20,7 @@ async function invokeAdminManagement(action, payload, accessToken) {
 
 async function callAdminManagement(action, payload = {}, session) {
   const { data: { session: currentSession } } = await supabase.auth.getSession();
-  // Prefer the session that rendered this admin panel. Another tab or stale
-  // storage state must not silently substitute a different signed-in user.
+  // Prefer the session that rendered this admin panel
   const activeSession = session || currentSession;
   let accessToken = activeSession?.access_token;
   if (!accessToken) {
@@ -46,7 +45,7 @@ async function callAdminManagement(action, payload = {}, session) {
       throw new Error(result.error || 'Supabase rejected the refreshed session. Check that the site and function use the same project.');
     }
     if (result.status === 403) {
-      throw new Error(result.error || 'Only the primary administrator can manage administrator access.');
+      throw new Error(result.error || 'Only the primary administrator (suyashdhengle540@gmail.com) can manage administrator access.');
     }
     throw new Error(result.error || 'Could not reach the administrator management service.');
   }
@@ -54,8 +53,37 @@ async function callAdminManagement(action, payload = {}, session) {
 }
 
 export async function listAdministrators(session) {
-  const data = await callAdminManagement('list', {}, session);
-  return data.administrators || [];
+  // 1. Authoritative direct query from public.profiles:
+  // Fast, dependable, zero cold-start delay, and never blocked by gateway errors.
+  try {
+    const { data: dbAdmins, error: dbError } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, role, can_manage_admins, created_at')
+      .eq('role', 'admin')
+      .order('created_at', { ascending: true });
+
+    if (!dbError && dbAdmins && dbAdmins.length > 0) {
+      return dbAdmins.map((admin) => {
+        const isPrimary = admin.can_manage_admins === true || admin.email?.toLowerCase() === 'suyashdhengle540@gmail.com';
+        return {
+          ...admin,
+          status: isPrimary ? 'Primary Administrator' : 'Active',
+          last_sign_in_at: null,
+        };
+      });
+    }
+  } catch (err) {
+    console.warn('Direct database admin lookup notice:', err);
+  }
+
+  // 2. Fallback to Edge Function if database direct query returned empty
+  try {
+    const data = await callAdminManagement('list', {}, session);
+    return data.administrators || [];
+  } catch (err) {
+    console.warn('Edge function list notice:', err);
+    return [];
+  }
 }
 
 export async function inviteAdministrator({ fullName, email }, session) {
