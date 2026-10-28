@@ -160,7 +160,7 @@ Deno.serve(async (req: Request) => {
 
       if (upgradeProfileErr) {
         console.error('Failed to upgrade profile to admin:', upgradeProfileErr.message);
-        return jsonResponse({ error: 'The administrator account could not be finalized. Please try again.' }, 500, headers);
+        return jsonResponse({ error: `Could not finalize administrator account: ${upgradeProfileErr.message}` }, 500, headers);
       }
 
       // Update auth user metadata
@@ -259,7 +259,7 @@ Deno.serve(async (req: Request) => {
 
       if (profileError) {
         console.error('Admin invite profile provisioning failed:', profileError.message);
-        return jsonResponse({ error: 'The administrator account could not be finalized. Please try again.' }, 500, headers);
+        return jsonResponse({ error: `Could not finalize administrator account: ${profileError.message}` }, 500, headers);
       }
 
       await supabaseAdmin.from('admin_access_events').insert({
