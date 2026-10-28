@@ -1,0 +1,254 @@
+/* ==========================================================================
+   AplaStay Cinematic Website Loader Styles
+   Midnight navy foundation, cosmic gradient lighting, and SVG animations
+   ========================================================================== */
+
+.cinematic-loader-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse 130% 90% at 50% 40%, #0c1228 0%, #070b18 55%, #03050c 100%);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Atmospheric Ambient Glow Orbs */
+.loader-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-violet {
+  top: 15%;
+  left: 20%;
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.28) 0%, rgba(139, 92, 246, 0) 70%);
+  animation: loaderGlowBreathe 8s ease-in-out infinite alternate;
+}
+
+.glow-blue {
+  bottom: 20%;
+  right: 18%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.24) 0%, rgba(59, 130, 246, 0) 70%);
+  animation: loaderGlowBreathe 10s ease-in-out infinite alternate-reverse;
+}
+
+.glow-cyan {
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, rgba(6, 182, 212, 0) 70%);
+  animation: loaderGlowBreathe 7s ease-in-out infinite alternate;
+}
+
+@keyframes loaderGlowBreathe {
+  0% { transform: scale(0.9) translate(0, 0); opacity: 0.5; }
+  50% { transform: scale(1.15) translate(20px, -15px); opacity: 0.85; }
+  100% { transform: scale(0.95) translate(-15px, 20px); opacity: 0.55; }
+}
+
+/* Subtle Rotating Light Beam */
+.loader-light-beam {
+  position: absolute;
+  top: -60%;
+  left: -30%;
+  width: 160%;
+  height: 220%;
+  background: radial-gradient(ellipse 50% 30% at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 65%);
+  transform: rotate(-30deg);
+  pointer-events: none;
+  z-index: 0;
+  animation: beamDrift 16s linear infinite;
+}
+
+@keyframes beamDrift {
+  0% { transform: rotate(-30deg) translateY(-10%); }
+  50% { transform: rotate(-30deg) translateY(10%); }
+  100% { transform: rotate(-30deg) translateY(-10%); }
+}
+
+/* Floating Dust Particles */
+.loader-particles-field {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.loader-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 0 8px #67E8F9;
+  opacity: 0.3;
+  animation: particleFloat infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(0.8);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.3);
+    opacity: 0.85;
+    box-shadow: 0 0 12px #A5B4FC;
+  }
+}
+
+/* Main Cinematic Core Layout */
+.cinematic-loader-core {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  max-width: 480px;
+}
+
+/* SVG Stage & Reflection Glow */
+.cinematic-svg-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.cinematic-svg-root {
+  filter: drop-shadow(0 0 25px rgba(139, 92, 246, 0.35));
+  overflow: visible;
+}
+
+.logo-floor-glow {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 110px;
+  height: 20px;
+  background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(6, 182, 212, 0.4) 0%, rgba(139, 92, 246, 0.2) 50%, transparent 80%);
+  filter: blur(8px);
+  pointer-events: none;
+  border-radius: 50%;
+  animation: floorGlowPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes floorGlowPulse {
+  0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(0.9); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+}
+
+/* Brand Typography Stack */
+.cinematic-text-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cinematic-brand-wordmark {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 2.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  line-height: 1.1;
+}
+
+.wordmark-apla {
+  color: #FFFFFF;
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.35);
+}
+
+.wordmark-stay {
+  background: linear-gradient(135deg, #A855F7 0%, #3B82F6 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  margin-left: 1px;
+  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.45));
+}
+
+.cinematic-tagline {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: #94A3B8;
+  text-transform: uppercase;
+  margin: 0.3rem 0 1.25rem 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* Status Indicator Wrap */
+.cinematic-status-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 220px;
+}
+
+.cinematic-progress-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.cinematic-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
+  border-radius: 9999px;
+  box-shadow: 0 0 8px #06B6D4;
+}
+
+.cinematic-status-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #C7D2FE;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+  white-space: nowrap;
+  animation: statusFadePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes statusFadePulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; text-shadow: 0 0 10px rgba(199, 210, 254, 0.5); }
+}
+
+/* Responsive Rules */
+@media (max-width: 640px) {
+  .cinematic-brand-wordmark {
+    font-size: 1.95rem;
+  }
+
+  .cinematic-tagline {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+  }
+
+  .cinematic-loader-core {
+    padding: 1.5rem 1rem;
+  }
+}

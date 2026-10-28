@@ -15,6 +15,7 @@ import StudentDashboard from './components/StudentDashboard';
 import OwnerDashboard from './components/OwnerDashboard';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminShell from './components/admin/AdminShell';
+import AplaStayCinematicLoader from './components/AplaStayCinematicLoader';
 import { IconGraduationCap, IconX, IconShield } from './components/Icons';
 import './App.css';
 
@@ -68,6 +69,11 @@ function CampusNestContent() {
   // When unauthenticated, currentView is always 'home'.
   const [userViewOverride, setUserViewOverride] = useState(null); // 'home' | 'dashboard' | null
 
+  // Cinematic App & Login Animation States
+  const [initialMountDone, setInitialMountDone] = useState(false);
+  const [authTransitioning, setAuthTransitioning] = useState(false);
+  const [authTransitionMsg, setAuthTransitionMsg] = useState('');
+
   const currentView = isAuthenticated ? (userViewOverride || 'dashboard') : 'home';
 
   const [searchParams, setSearchParams] = useState({
@@ -115,10 +121,51 @@ function CampusNestContent() {
     });
   };
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (activeRole) => {
+    const isOwner = activeRole === 'owner';
+    const targetPortal = isOwner ? 'Property Owner Portal' : 'Student Dashboard';
+    setAuthTransitionMsg(`Welcome to AplaStay! Entering ${targetPortal}...`);
+    setAuthTransitioning(true);
     setUserViewOverride('dashboard');
     setAuthModalState({ isOpen: false, initialMode: 'login', initialRole: 'student' });
   };
+
+  const handleAdminLogin = async (creds) => {
+    setAuthTransitionMsg('Authorizing administrator credentials...');
+    setAuthTransitioning(true);
+    try {
+      await signInAdmin(creds);
+    } catch (err) {
+      setAuthTransitioning(false);
+      throw err;
+    }
+  };
+
+  // 1. Initial Cinematic Application Loading Animation
+  if (!initialMountDone) {
+    return (
+      <AplaStayCinematicLoader 
+        isReady={!loading}
+        minDuration={2200}
+        maxDuration={3800}
+        message="Initializing verified campus network..."
+        onComplete={() => setInitialMountDone(true)}
+      />
+    );
+  }
+
+  // 2. Cinematic Login / Role Transition Animation (Any role: Student, Owner, Admin)
+  if (authTransitioning) {
+    return (
+      <AplaStayCinematicLoader 
+        isReady={true}
+        minDuration={1800}
+        maxDuration={3200}
+        message={authTransitionMsg || 'Entering your AplaStay portal...'}
+        onComplete={() => setAuthTransitioning(false)}
+      />
+    );
+  }
 
   // -------------------------------------------------------------------------
   // Dedicated Admin Route (/admin) with Strict Security Route Guard
@@ -126,21 +173,11 @@ function CampusNestContent() {
   if (normalizePath(pathname) === '/admin') {
     if (loading) {
       return (
-        <div className="auth-loading-screen" aria-label="Verifying administrative session">
-          <div className="auth-loading-card">
-            <div className="loading-logo-box">
-              <IconShield className="loading-cap-icon text-indigo" />
-              <div className="loading-dot-pulse" />
-            </div>
-            <div className="loading-text-stack">
-              <span className="loading-brand">Campus<span className="brand-highlight">Nest</span></span>
-              <span className="loading-status">Verifying administrative authorization...</span>
-            </div>
-            <div className="loading-bar">
-              <div className="loading-bar-fill" />
-            </div>
-          </div>
-        </div>
+        <AplaStayCinematicLoader 
+          isReady={false}
+          message="Verifying administrative authorization..."
+          maxDuration={3500}
+        />
       );
     }
 
@@ -150,7 +187,7 @@ function CampusNestContent() {
           initialView="reset"
           onUpdatePassword={updateRecoveredPassword}
           onCancelPasswordRecovery={signOut}
-          onLogin={signInAdmin}
+          onLogin={handleAdminLogin}
           onGoHome={() => navigateTo('/')}
           securityNotice={adminSecurityNotice}
         />
@@ -173,7 +210,7 @@ function CampusNestContent() {
 
     return (
       <AdminLogin 
-        onLogin={signInAdmin}
+        onLogin={handleAdminLogin}
         onRequestReset={requestPasswordRecovery}
         onUpdatePassword={updateRecoveredPassword}
         onCancelPasswordRecovery={signOut}
@@ -185,24 +222,14 @@ function CampusNestContent() {
     );
   }
 
-  // Loading Screen while Supabase resolves session / email confirmation
+  // Fallback Loading Screen while Supabase resolves session / email confirmation
   if (loading) {
     return (
-      <div className="auth-loading-screen" aria-label="Loading student session">
-        <div className="auth-loading-card">
-          <div className="loading-logo-box">
-            <IconGraduationCap className="loading-cap-icon" />
-            <div className="loading-dot-pulse" />
-          </div>
-          <div className="loading-text-stack">
-            <span className="loading-brand">Campus<span className="brand-highlight">Nest</span></span>
-            <span className="loading-status">Connecting to student session...</span>
-          </div>
-          <div className="loading-bar">
-            <div className="loading-bar-fill" />
-          </div>
-        </div>
-      </div>
+      <AplaStayCinematicLoader 
+        isReady={false}
+        message="Connecting to student session..."
+        maxDuration={3500}
+      />
     );
   }
 
