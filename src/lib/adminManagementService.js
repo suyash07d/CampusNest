@@ -20,7 +20,9 @@ async function invokeAdminManagement(action, payload, accessToken) {
 
 async function callAdminManagement(action, payload = {}, session) {
   const { data: { session: currentSession } } = await supabase.auth.getSession();
-  const activeSession = currentSession || session;
+  // Prefer the session that rendered this admin panel. Another tab or stale
+  // storage state must not silently substitute a different signed-in user.
+  const activeSession = session || currentSession;
   let accessToken = activeSession?.access_token;
   if (!accessToken) {
     throw new Error('Your administrator session is missing. Sign in again, then retry.');
