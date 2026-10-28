@@ -13,6 +13,7 @@ import OwnerModal from './components/OwnerModal';
 import AuthModal from './components/AuthModal';
 import StudentDashboard from './components/StudentDashboard';
 import OwnerDashboard from './components/OwnerDashboard';
+import OwnerPortalHero from './components/OwnerPortalHero';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminShell from './components/admin/AdminShell';
 import AplaStayCinematicLoader from './components/AplaStayCinematicLoader';
@@ -128,6 +129,9 @@ function AplaStayContent() {
     setAuthTransitioning(true);
     setUserViewOverride('dashboard');
     setAuthModalState({ isOpen: false, initialMode: 'login', initialRole: 'student' });
+    if (isOwner) {
+      navigateTo('/owner');
+    }
   };
 
   const handleAdminLogin = async (creds) => {
@@ -222,6 +226,116 @@ function AplaStayContent() {
     );
   }
 
+  // -------------------------------------------------------------------------
+  // Dedicated PG Owner Portal Route (/owner, /owners, /partner)
+  // -------------------------------------------------------------------------
+  const isOwnerRoute = ['/owner', '/owners', '/partner'].includes(normalizePath(pathname));
+
+  if (isOwnerRoute) {
+    if (loading) {
+      return (
+        <AplaStayCinematicLoader 
+          isReady={false}
+          message="Connecting to AplaStay Host Portal..."
+          maxDuration={3500}
+        />
+      );
+    }
+
+    if (isAuthenticated && role === 'owner') {
+      return (
+        <div className="app-root">
+          <Navbar 
+            onOpenAuth={handleOpenLogin}
+            onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+            onOpenOwnerPortal={() => navigateTo('/owner')}
+            onScrollToDiscovery={handleScrollToDiscovery}
+            currentView="dashboard"
+            onNavigateHome={() => navigateTo('/')}
+            onOpenDashboard={() => navigateTo('/owner')}
+            onOpenAdmin={() => navigateTo('/admin')}
+          />
+          <main className="main-content">
+            <OwnerDashboard onGoToHome={() => navigateTo('/')} />
+          </main>
+          
+          <AnimatePresence>
+            {authModalState.isOpen && (
+              <AuthModal 
+                key="auth-modal"
+                initialMode={authModalState.initialMode}
+                initialRole={authModalState.initialRole}
+                onClose={() => setAuthModalState(prev => ({ ...prev, isOpen: false }))}
+                onAuthSuccess={handleAuthSuccess}
+              />
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    }
+
+    return (
+      <div className="app-root">
+        <Navbar 
+          onOpenAuth={handleOpenLogin}
+          onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+          onOpenOwnerPortal={() => navigateTo('/owner')}
+          onScrollToDiscovery={handleScrollToDiscovery}
+          currentView="home"
+          onNavigateHome={() => navigateTo('/')}
+          onOpenDashboard={() => navigateTo('/owner')}
+          onOpenAdmin={() => navigateTo('/admin')}
+        />
+        <main className="main-content">
+          <OwnerPortalHero 
+            onOpenLogin={() => {
+              setAuthModalState({
+                isOpen: true,
+                initialMode: 'login',
+                initialRole: 'owner',
+              });
+            }}
+            onOpenRegister={() => {
+              setAuthModalState({
+                isOpen: true,
+                initialMode: 'signup',
+                initialRole: 'owner',
+              });
+            }}
+            onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+          />
+        </main>
+        <Footer 
+          onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+          onOpenOwnerPortal={() => navigateTo('/owner')}
+          onOpenAuth={handleOpenLogin}
+          onOpenAdmin={() => navigateTo('/admin')}
+        />
+
+        <AnimatePresence>
+          {isOwnerModalOpen && (
+            <OwnerModal 
+              key="owner-modal"
+              onClose={() => setIsOwnerModalOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {authModalState.isOpen && (
+            <AuthModal 
+              key="auth-modal"
+              initialMode={authModalState.initialMode}
+              initialRole={authModalState.initialRole}
+              onClose={() => setAuthModalState(prev => ({ ...prev, isOpen: false }))}
+              onAuthSuccess={handleAuthSuccess}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
   // Fallback Loading Screen while Supabase resolves session / email confirmation
   if (loading) {
     return (
@@ -244,6 +358,7 @@ function AplaStayContent() {
         onNavigateHome={() => setUserViewOverride('home')}
         onOpenDashboard={() => setUserViewOverride('dashboard')}
         onOpenAdmin={() => navigateTo('/admin')}
+        onOpenOwnerPortal={() => navigateTo('/owner')}
       />
 
       {/* Global Confirmation / Notification Alert */}
@@ -338,6 +453,7 @@ function AplaStayContent() {
             {/* 7. For PG Owners */}
             <OwnerSection 
               onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+              onOpenOwnerPortal={() => navigateTo('/owner')}
             />
           </>
         )}
@@ -347,6 +463,7 @@ function AplaStayContent() {
       {currentView !== 'dashboard' && (
         <Footer 
           onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
+          onOpenOwnerPortal={() => navigateTo('/owner')}
           onOpenAuth={handleOpenLogin}
           onOpenAdmin={() => navigateTo('/admin')}
         />

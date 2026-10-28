@@ -4,7 +4,7 @@ import './AplaStayLogo.css';
 import { IconGraduationCap, IconShield, IconMail, IconSparkles } from './Icons';
 import './Footer.css';
 
-export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
+export default function Footer({ onOpenOwnerModal, onOpenOwnerPortal, onOpenAuth, onOpenAdmin }) {
   const handleScrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -60,8 +60,13 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
             <h4 className="footer-col-title">For Hosts & Access</h4>
             <ul className="footer-links-list">
               <li>
+                <button type="button" className="footer-text-btn" onClick={onOpenOwnerPortal || onOpenOwnerModal}>
+                  Host Portal &amp; Pricing
+                </button>
+              </li>
+              <li>
                 <button type="button" className="footer-text-btn" onClick={onOpenOwnerModal}>
-                  List Your Property
+                  List Your Property Form
                 </button>
               </li>
               <li>
@@ -74,8 +79,16 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
                   Admin Gateway
                 </button>
               </li>
-              <li><a href="#owners" onClick={() => handleScrollTo('owners')}>Host Verification Standards</a></li>
-              <li><a href="#owners" onClick={() => handleScrollTo('owners')}>Zero Commission Program</a></li>
+              <li>
+                <button type="button" className="footer-text-btn" onClick={onOpenOwnerPortal || onOpenOwnerModal}>
+                  Host Verification Standards
+                </button>
+              </li>
+              <li>
+                <button type="button" className="footer-text-btn" onClick={onOpenOwnerPortal || onOpenOwnerModal}>
+                  Zero Commission Program
+                </button>
+              </li>
             </ul>
           </div>
         </div>

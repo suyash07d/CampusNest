@@ -9,7 +9,7 @@ import {
 } from './Icons';
 import './OwnerSection.css';
 
-export default function OwnerSection({ onOpenOwnerModal }) {
+export default function OwnerSection({ onOpenOwnerModal, onOpenOwnerPortal }) {
   return (
     <section id="owners" className="owner-section" aria-label="For PG Owners and Property Hosts">
       <div className="container">
@@ -64,10 +64,17 @@ export default function OwnerSection({ onOpenOwnerModal }) {
                 <button
                   type="button"
                   className="btn-list-pg"
+                  onClick={onOpenOwnerPortal || onOpenOwnerModal}
+                >
+                  <span>Open Host Portal</span>
+                  <IconArrowRight className="btn-icon-right" />
+                </button>
+                <button
+                  type="button"
+                  className="btn-secondary-host"
                   onClick={onOpenOwnerModal}
                 >
-                  <span>List your PG</span>
-                  <IconArrowRight className="btn-icon-right" />
+                  <span>Quick Inquiry</span>
                 </button>
                 <span className="owner-zero-fee-note">
                   ✓ Free onboarding for 2026 Academic Season

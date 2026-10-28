@@ -21,6 +21,7 @@ import './Navbar.css';
 export default function Navbar({ 
   onOpenAuth, 
   onOpenOwnerModal, 
+  onOpenOwnerPortal,
   onScrollToDiscovery, 
   currentView = 'home',
   onNavigateHome,
@@ -124,7 +125,7 @@ export default function Navbar({
             <button 
               type="button" 
               className="nav-link nav-owner-link"
-              onClick={onOpenOwnerModal}
+              onClick={onOpenOwnerPortal || onOpenOwnerModal}
             >
               <span className="owner-indicator-dot" />
               <span>For PG Owners</span>
@@ -355,10 +356,12 @@ export default function Navbar({
                   className="mobile-nav-link"
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    onOpenOwnerModal();
+                    if (onOpenOwnerPortal) onOpenOwnerPortal();
+                    else onOpenOwnerModal();
                   }}
                 >
-                  <span>For PG Owners (List Property)</span>
+                  <IconBuilding className="mobile-link-icon text-cyan" />
+                  <span>For PG Owners (Host Portal)</span>
                 </button>
               </div>
 

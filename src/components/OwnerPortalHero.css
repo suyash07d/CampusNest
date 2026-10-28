@@ -1,0 +1,361 @@
+/* ==========================================================================
+   AplaStay — Dedicated PG Owner Portal Route Styles (/owner)
+   ========================================================================== */
+
+.owner-portal-root {
+  position: relative;
+  padding: 60px 0 100px;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 80% at 50% 20%, #0d1326 0%, #070a14 60%, #03050c 100%);
+  color: #FFFFFF;
+  min-height: calc(100vh - 80px);
+}
+
+.portal-glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-violet {
+  top: -80px;
+  left: 10%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.28) 0%, transparent 70%);
+}
+
+.glow-cyan {
+  bottom: 50px;
+  right: 8%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, transparent 70%);
+}
+
+.portal-grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.portal-hero-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.portal-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #67E8F9;
+  margin-bottom: 1.5rem;
+}
+
+.pill-divider {
+  opacity: 0.5;
+}
+
+.portal-hero-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  max-width: 880px;
+  margin-bottom: 1.25rem;
+}
+
+.title-accent {
+  background: linear-gradient(135deg, #A855F7 0%, #3B82F6 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.portal-hero-subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  color: #CBD5E1;
+  line-height: 1.6;
+  max-width: 760px;
+  margin-bottom: 2.25rem;
+}
+
+.portal-cta-group {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-portal-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.95rem 1.85rem;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 25px -4px rgba(139, 92, 246, 0.5);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-portal-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -4px rgba(139, 92, 246, 0.65);
+}
+
+.btn-portal-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.95rem 1.85rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-portal-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 4 Pillars Grid */
+.portal-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 4rem;
+}
+
+.pillar-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.75rem 1.5rem;
+  text-align: left;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+}
+
+.pillar-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5);
+}
+
+.pillar-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.15rem;
+}
+
+.pillar-icon.bg-violet { background: rgba(139, 92, 246, 0.18); }
+.pillar-icon.bg-cyan { background: rgba(6, 182, 212, 0.18); }
+.pillar-icon.bg-blue { background: rgba(59, 130, 246, 0.18); }
+.pillar-icon.bg-emerald { background: rgba(16, 185, 129, 0.18); }
+
+.text-violet { color: #A78BFA; }
+.text-cyan { color: #67E8F9; }
+.text-blue { color: #60A5FA; }
+.text-emerald { color: #34D399; }
+
+.pillar-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+.pillar-card p {
+  font-size: 0.875rem;
+  color: #94A3B8;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* Quick Register Card */
+.portal-quicklist-card {
+  width: 100%;
+  max-width: 960px;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.quicklist-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #34D399;
+  margin-bottom: 0.85rem;
+}
+
+.live-dot-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+.portal-quicklist-card h2 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+.portal-quicklist-card p {
+  font-size: 0.95rem;
+  color: #CBD5E1;
+  margin-bottom: 1.75rem;
+}
+
+.quicklist-form-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.2fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+.quicklist-input,
+.quicklist-select {
+  height: 48px;
+  padding: 0 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  color: #FFFFFF;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.quicklist-input:focus,
+.quicklist-select:focus {
+  border-color: #8B5CF6;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+}
+
+.quicklist-select option {
+  background: #0F172A;
+  color: #FFFFFF;
+}
+
+.btn-quicklist-submit {
+  height: 48px;
+  padding: 0 1.5rem;
+  background: #10B981;
+  color: #FFFFFF;
+  font-weight: 700;
+  border-radius: 10px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-quicklist-submit:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.quicklist-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 1.25rem 1.5rem;
+  border-radius: 14px;
+  color: #D1FAE5;
+}
+
+.quicklist-success-banner strong {
+  display: block;
+  font-size: 1.05rem;
+  color: #FFFFFF;
+  margin-bottom: 0.25rem;
+}
+
+.quicklist-success-banner p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #A7F3D0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .portal-pillars-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quicklist-form-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .portal-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quicklist-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-quicklist-submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
