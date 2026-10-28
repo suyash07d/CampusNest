@@ -4,11 +4,12 @@ import {
   IconLock, 
   IconLogOut, 
   IconExternalLink,
-  IconSparkles
+  IconSparkles,
+  IconUser
 } from '../Icons';
 import './AdminShell.css';
 
-export default function AdminSettings({ profile, personalization, onSignOut, onGoHome, onReplayWelcome }) {
+export default function AdminSettings({ profile, personalization, onSignOut, onGoHome, onReplayWelcome, onNavigateToProfile }) {
   const adminName = personalization?.displayName || profile?.full_name || 'System Administrator';
   const adminEmail = personalization?.email || profile?.email || '';
   const adminRole = profile?.role || 'admin';
@@ -74,6 +75,16 @@ export default function AdminSettings({ profile, personalization, onSignOut, onG
             </div>
 
             <div className="settings-card-actions">
+              {onNavigateToProfile && (
+                <button
+                  type="button"
+                  className="btn-replay-welcome-action"
+                  onClick={onNavigateToProfile}
+                >
+                  <IconUser className="w-4 h-4 text-indigo" />
+                  <span>Edit Profile, Photo &amp; Info</span>
+                </button>
+              )}
               {onReplayWelcome && (
                 <button
                   type="button"

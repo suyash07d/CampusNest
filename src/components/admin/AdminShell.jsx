@@ -4,7 +4,11 @@ import {
   IconMenu, 
   IconCheck, 
   IconExternalLink,
-  IconX
+  IconX,
+  IconLayoutDashboard,
+  IconHome,
+  IconMail,
+  IconUser
 } from '../Icons';
 import AdminSidebar from './AdminSidebar';
 import AdminOverview from './AdminOverview';
@@ -16,6 +20,7 @@ import AdminReports from './AdminReports';
 import AdminActivityAudit from './AdminActivityAudit';
 import AdminSettings from './AdminSettings';
 import AdminManagement from './AdminManagement';
+import AdminProfileEdit from './AdminProfileEdit';
 import AdminWelcomeSplash from './AdminWelcomeSplash';
 import { getAdminPersonalization } from '../../config/adminPersonalization';
 import { getOverviewMetrics } from '../../lib/adminService';
@@ -24,6 +29,7 @@ import './AdminShell.css';
 export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [currentProfile, setCurrentProfile] = useState(profile);
   const [counts, setCounts] = useState({
     pendingPGs: 0,
     openReports: 0,
@@ -34,9 +40,13 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
   const [toastNotice, setToastNotice] = useState(null);
   const [selectedPGForReview, setSelectedPGForReview] = useState(null);
 
+  useEffect(() => {
+    setCurrentProfile(profile);
+  }, [profile]);
+
   // Personalized Administrator Identity & Welcome State
-  const personalization = getAdminPersonalization(profile);
-  const sessionKey = `cn_admin_welcome_seen_${profile?.id || profile?.email || 'admin'}`;
+  const personalization = getAdminPersonalization(currentProfile);
+  const sessionKey = `cn_admin_welcome_seen_${currentProfile?.id || currentProfile?.email || 'admin'}`;
   const [showWelcomeSplash, setShowWelcomeSplash] = useState(() => {
     if (typeof window === 'undefined') return false;
     return !sessionStorage.getItem(sessionKey);
@@ -95,6 +105,8 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
     switch (activeSection) {
       case 'overview':
         return 'Overview Dashboard';
+      case 'profile':
+        return 'Admin Profile';
       case 'students':
         return 'Student Intelligence';
       case 'owners':
@@ -167,7 +179,7 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
             if (sec !== 'pgs') setSelectedPGForReview(null);
           }}
           counts={counts}
-          profile={profile}
+          profile={currentProfile}
           personalization={personalization}
           onSignOut={handleSignOut}
           onGoHome={onGoHome}
@@ -190,7 +202,7 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
               </button>
 
               <div className="header-breadcrumb">
-                <span className="breadcrumb-root">CampusNest Control Center</span>
+                <span className="breadcrumb-root">Control Center</span>
                 <span className="breadcrumb-sep">/</span>
                 <span className="breadcrumb-active">{getSectionTitle()}</span>
               </div>
@@ -200,7 +212,7 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
               {/* RLS Security Live Indicator */}
               <div className="header-status-indicator" title="Database RLS is actively enforced">
                 <div className="pulse-dot-green" />
-                <span className="indicator-label">RLS Enforced</span>
+                <span className="indicator-label">RLS Active</span>
               </div>
 
               {/* Public Portal Shortcut */}
@@ -210,16 +222,26 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
                 onClick={onGoHome}
                 title="View public student portal"
               >
-                <span>Public Portal</span>
+                <span>Portal</span>
                 <IconExternalLink className="w-3.5 h-3.5" />
               </button>
 
               {/* Admin Avatar Chip */}
-              <div className="header-admin-chip">
+              <div 
+                className="header-admin-chip is-interactive"
+                onClick={() => setActiveSection('profile')}
+                title="Edit your administrator profile"
+                role="button"
+                tabIndex={0}
+              >
                 <div className="chip-avatar">
-                  {(personalization?.displayName || profile?.full_name || 'A')[0].toUpperCase()}
+                  {currentProfile?.avatar_url ? (
+                    <img src={currentProfile.avatar_url} alt="" className="chip-avatar-img" />
+                  ) : (
+                    (personalization?.displayName || currentProfile?.full_name || 'A')[0].toUpperCase()
+                  )}
                 </div>
-                <span className="chip-name">{personalization?.displayName || profile?.full_name || 'Admin'}</span>
+                <span className="chip-name">{personalization?.displayName || currentProfile?.full_name || 'Admin'}</span>
               </div>
             </div>
           </header>
@@ -228,10 +250,21 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
           <main className="admin-stage-viewport">
             {activeSection === 'overview' && (
               <AdminOverview
-                profile={profile}
+                profile={currentProfile}
                 personalization={personalization}
                 onNavigate={setActiveSection}
                 onReviewPG={handleReviewPG}
+              />
+            )}
+
+            {activeSection === 'profile' && (
+              <AdminProfileEdit
+                profile={currentProfile}
+                session={session}
+                onProfileUpdated={(updated) => {
+                  setCurrentProfile(updated);
+                  showToast('Administrator profile updated successfully!');
+                }}
               />
             )}
 
@@ -271,22 +304,73 @@ export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
               <AdminActivityAudit />
             )}
 
-            {activeSection === 'admins' && profile?.can_manage_admins && (
+            {activeSection === 'admins' && currentProfile?.can_manage_admins && (
               <AdminManagement session={session} />
             )}
 
             {activeSection === 'settings' && (
               <AdminSettings
-                profile={profile}
+                profile={currentProfile}
                 personalization={personalization}
                 onSignOut={handleSignOut}
                 onGoHome={onGoHome}
+                onNavigateToProfile={() => setActiveSection('profile')}
                 onReplayWelcome={() => setShowWelcomeSplash(true)}
               />
             )}
           </main>
         </div>
       </div>
+
+      {/* Mobile App Bottom Navigation Bar */}
+      <nav className="admin-mobile-bottom-bar" aria-label="Mobile Navigation">
+        <button
+          type="button"
+          className={`mobile-nav-btn ${activeSection === 'overview' ? 'is-active' : ''}`}
+          onClick={() => setActiveSection('overview')}
+        >
+          <IconLayoutDashboard className="w-5 h-5" />
+          <span>Overview</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-nav-btn ${activeSection === 'pgs' ? 'is-active' : ''}`}
+          onClick={() => setActiveSection('pgs')}
+        >
+          <div className="btn-icon-relative">
+            <IconHome className="w-5 h-5" />
+            {counts.pendingPGs > 0 && <span className="mobile-badge">{counts.pendingPGs}</span>}
+          </div>
+          <span>Listings</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-nav-btn ${activeSection === 'enquiries' ? 'is-active' : ''}`}
+          onClick={() => setActiveSection('enquiries')}
+        >
+          <div className="btn-icon-relative">
+            <IconMail className="w-5 h-5" />
+            {counts.totalEnquiries > 0 && <span className="mobile-badge badge-indigo">{counts.totalEnquiries}</span>}
+          </div>
+          <span>Enquiries</span>
+        </button>
+        <button
+          type="button"
+          className={`mobile-nav-btn ${activeSection === 'profile' ? 'is-active' : ''}`}
+          onClick={() => setActiveSection('profile')}
+        >
+          <IconUser className="w-5 h-5" />
+          <span>Profile</span>
+        </button>
+        <button
+          type="button"
+          className="mobile-nav-btn"
+          onClick={() => setMobileSidebarOpen(true)}
+        >
+          <IconMenu className="w-5 h-5" />
+          <span>More</span>
+        </button>
+      </nav>
     </div>
   );
 }

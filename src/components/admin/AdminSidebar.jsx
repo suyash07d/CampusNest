@@ -13,6 +13,7 @@ import {
   IconX,
   IconExternalLink,
   IconUsers,
+  IconUser,
 } from '../Icons';
 import './AdminShell.css';
 
@@ -32,6 +33,11 @@ export default function AdminSidebar({
       id: 'overview',
       label: 'Overview',
       icon: IconLayoutDashboard,
+    },
+    {
+      id: 'profile',
+      label: 'Admin Profile',
+      icon: IconUser,
     },
     {
       id: 'students',
@@ -167,11 +173,24 @@ export default function AdminSidebar({
 
         {/* Bottom Identity & Sign Out block */}
         <div className="sidebar-bottom-block">
-          <div className="admin-identity-card">
+          <div 
+            className="admin-identity-card is-clickable"
+            onClick={() => {
+              onSelectSection('profile');
+              onCloseMobile?.();
+            }}
+            title="Click to view & edit admin profile"
+            role="button"
+            tabIndex={0}
+          >
             <div className="identity-avatar-box">
-              <span className="avatar-initials">
-                {adminName.slice(0, 2).toUpperCase()}
-              </span>
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt={adminName} className="avatar-img-sidebar" />
+              ) : (
+                <span className="avatar-initials">
+                  {adminName.slice(0, 2).toUpperCase()}
+                </span>
+              )}
               <div className="avatar-status-dot" title="Authenticated Admin" />
             </div>
             <div className="identity-info-stack">
@@ -182,7 +201,7 @@ export default function AdminSidebar({
               <span className="admin-email" title={adminEmail}>{adminEmail}</span>
               <div className="identity-verified-pill">
                 <IconCheck className="w-3 h-3 text-emerald" />
-                <span>PostgreSQL RLS Active</span>
+                <span>Edit Profile</span>
               </div>
             </div>
           </div>
