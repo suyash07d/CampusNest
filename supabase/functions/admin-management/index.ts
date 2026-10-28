@@ -59,14 +59,14 @@ Deno.serve(async (req: Request) => {
     const callerEmail = (caller.email || '').toLowerCase().trim();
     const isPrimaryAdmin = callerEmail === 'suyashdhengle540@gmail.com';
 
-    const { data: callerProfile, error: callerProfileError } = await supabaseAdmin
+    const { data: callerProfiles } = await supabaseAdmin
       .from('profiles')
       .select('role, can_manage_admins')
-      .eq('id', caller.id)
-      .maybeSingle();
+      .eq('id', caller.id);
+
+    const callerProfile = callerProfiles?.[0];
 
     const isAuthorized = isPrimaryAdmin || (
-      !callerProfileError &&
       callerProfile?.role === 'admin' &&
       callerProfile?.can_manage_admins === true
     );
@@ -98,9 +98,10 @@ Deno.serve(async (req: Request) => {
       const authUserById = new Map((authUsers?.users || []).map((user) => [user.id, user] as const));
       const administrators = (profiles || []).map((profile) => {
         const authUser = authUserById.get(profile.id);
+        const isPrimary = profile.email?.toLowerCase() === 'suyashdhengle540@gmail.com';
         return {
           ...profile,
-          status: authUser?.email_confirmed_at ? 'Active' : 'Invite pending',
+          status: isPrimary ? 'Primary Administrator' : (authUser?.email_confirmed_at ? 'Active' : 'Invite pending'),
           last_sign_in_at: authUser?.last_sign_in_at || null,
         };
       });
@@ -117,41 +118,123 @@ Deno.serve(async (req: Request) => {
     if (fullName.length < 2 || fullName.length > 120) {
       return jsonResponse({ error: 'Enter a name between 2 and 120 characters.' }, 400, headers);
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return jsonResponse({ error: 'Enter a valid email address.' }, 400, headers);
+    if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(email)) {
+      return jsonResponse({ error: 'Enter a valid email address with a domain (e.g. name@gmail.com).' }, 400, headers);
     }
 
-    const { data: existingProfile, error: existingProfileError } = await supabaseAdmin
+    // 1. Check existing accounts in profiles
+    const { data: profileRows } = await supabaseAdmin
       .from('profiles')
-      .select('id, role')
-      .eq('email', email)
-      .maybeSingle();
+      .select('id, full_name, email, role')
+      .ilike('email', email);
 
-    if (existingProfileError) {
-      console.error('Admin invite duplicate check failed:', existingProfileError.message);
-      return jsonResponse({ error: 'The account could not be checked. Please try again.' }, 500, headers);
+    const existingProfile = profileRows && profileRows.length > 0 ? profileRows[0] : null;
+
+    if (existingProfile?.role === 'admin') {
+      return jsonResponse({ error: 'This person is already an active administrator.' }, 409, headers);
     }
-    if (existingProfile) {
-      return jsonResponse({ error: existingProfile.role === 'admin' ? 'This person is already an administrator.' : 'This email already belongs to a CampusNest account.' }, 409, headers);
+
+    // Also check auth users
+    let existingAuthUser = null;
+    try {
+      const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      existingAuthUser = authData?.users?.find((u) => (u.email || '').toLowerCase() === email) || null;
+      if (existingAuthUser?.user_metadata?.role === 'admin') {
+        return jsonResponse({ error: 'This person is already an active administrator.' }, 409, headers);
+      }
+    } catch (listErr) {
+      console.warn('Auth user list check notice:', listErr);
     }
 
     const siteUrl = (Deno.env.get('SITE_URL') || 'https://campus-nest-plum.vercel.app').replace(/\/$/, '');
+
+    // 2. If user already exists (e.g. owner or student), promote them to administrator
+    if (existingProfile || existingAuthUser) {
+      const targetUserId = existingProfile?.id || existingAuthUser?.id;
+
+      const { error: upgradeProfileErr } = await supabaseAdmin
+        .from('profiles')
+        .upsert({
+          id: targetUserId,
+          email,
+          full_name: fullName || existingProfile?.full_name || existingAuthUser?.user_metadata?.full_name,
+          role: 'admin',
+          is_verified: true,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+
+      if (upgradeProfileErr) {
+        console.error('Failed to upgrade profile to admin:', upgradeProfileErr.message);
+        return jsonResponse({ error: 'The administrator account could not be finalized. Please try again.' }, 500, headers);
+      }
+
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+          user_metadata: {
+            role: 'admin',
+            full_name: fullName || existingProfile?.full_name || existingAuthUser?.user_metadata?.full_name,
+          },
+        });
+      } catch (authMetaErr) {
+        console.warn('Auth user metadata update notice:', authMetaErr);
+      }
+
+      await supabaseAdmin.from('admin_access_events').insert({
+        actor_id: caller.id,
+        target_email: email,
+        action: 'invite_sent',
+        ip_address: clientIp,
+      });
+
+      return jsonResponse({
+        success: true,
+        email,
+        promoted: true,
+        message: `${fullName || existingProfile?.full_name || email} has been granted administrator access.`,
+      }, 200, headers);
+    }
+
+    // 3. Brand new user - dispatch email invitation or fallback to generateLink
+    let invitedUserId: string | null = null;
+    let inviteNotice = '';
+
     const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       data: { full_name: fullName, role: 'admin' },
       redirectTo: `${siteUrl}/admin`,
     });
 
-    if (inviteError || !inviteData?.user) {
-      console.warn('Admin invitation failed:', inviteError?.message || 'No user returned.');
-      const conflict = inviteError?.code === 'email_exists' || inviteError?.status === 422;
-      return jsonResponse({ error: conflict ? 'This email is already registered. Ask that person to sign in with their existing account.' : 'The invitation email could not be sent. Check Supabase email settings and try again.' }, conflict ? 409 : 502, headers);
+    if (!inviteError && inviteData?.user) {
+      invitedUserId = inviteData.user.id;
+      inviteNotice = `Invitation sent to ${email}. They’ll receive a secure email link to set their password.`;
+    } else {
+      console.warn('inviteUserByEmail notice, trying generateLink fallback:', inviteError?.message);
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'invite',
+        email,
+        options: {
+          data: { full_name: fullName, role: 'admin' },
+          redirectTo: `${siteUrl}/admin`,
+        },
+      });
+
+      if (!linkError && linkData?.user) {
+        invitedUserId = linkData.user.id;
+        inviteNotice = `Administrator account created for ${email}.`;
+      } else {
+        console.error('Admin invitation failed:', inviteError?.message, linkError?.message);
+        const conflict = inviteError?.code === 'email_exists' || inviteError?.status === 422;
+        return jsonResponse({
+          error: conflict
+            ? 'This email is already registered with a CampusNest account.'
+            : (inviteError?.message || linkError?.message || 'The invitation email could not be sent. Please check Supabase email settings.'),
+        }, conflict ? 409 : 502, headers);
+      }
     }
 
-    const invitedUser = inviteData.user;
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
-        id: invitedUser.id,
+        id: invitedUserId,
         full_name: fullName,
         email,
         role: 'admin',
@@ -161,22 +244,20 @@ Deno.serve(async (req: Request) => {
 
     if (profileError) {
       console.error('Admin invite profile provisioning failed:', profileError.message);
-      await supabaseAdmin.auth.admin.deleteUser(invitedUser.id);
-      return jsonResponse({ error: 'The invite could not be finalized. No administrator account was added.' }, 500, headers);
+      return jsonResponse({ error: 'The invite could not be finalized. Please try again.' }, 500, headers);
     }
 
-    const { error: auditError } = await supabaseAdmin.from('admin_access_events').insert({
+    await supabaseAdmin.from('admin_access_events').insert({
       actor_id: caller.id,
       target_email: email,
       action: 'invite_sent',
       ip_address: clientIp,
     });
-    if (auditError) console.warn('Admin invitation audit record failed:', auditError.message);
 
     return jsonResponse({
       success: true,
       email,
-      message: 'Invitation sent. The administrator will set their password from the secure email link.',
+      message: inviteNotice || `Invitation sent to ${email}.`,
     }, 200, headers);
   } catch (error) {
     console.error('Admin management request failed:', error instanceof Error ? error.message : String(error));

@@ -33,19 +33,28 @@ export default function AdminManagement({ session }) {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (fullName.trim().length < 2) {
+    const cleanName = fullName.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    if (cleanName.length < 2) {
       setErrorMessage('Enter the administrator’s full name.');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setErrorMessage('Enter a valid email address.');
+
+    if (cleanEmail.includes('@gmailcom') || cleanEmail.includes('@yahoocom') || cleanEmail.includes('@outlookcom')) {
+      setErrorMessage('Missing "." before "com". Did you mean @gmail.com?');
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(cleanEmail)) {
+      setErrorMessage('Enter a valid email address with a domain (e.g. name@gmail.com).');
       return;
     }
 
     setIsInviting(true);
     try {
-      const result = await inviteAdministrator({ fullName, email }, session);
-      setSuccessMessage(result.message || `Invitation sent to ${email.trim().toLowerCase()}.`);
+      const result = await inviteAdministrator({ fullName: cleanName, email: cleanEmail }, session);
+      setSuccessMessage(result.message || `Invitation sent to ${cleanEmail}.`);
       setFullName('');
       setEmail('');
       await loadAdministrators();
