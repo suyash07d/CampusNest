@@ -46,7 +46,7 @@ export default function StudentSaved({
 
           <h3 className="empty-state-headline">Your PG Wishlist is Empty</h3>
           <p className="empty-state-description">
-            You haven&apos;t saved any PGs yet. As you explore CampusNest, bookmark accommodations near your college campus to compare rents, amenities, and walking distances side-by-side.
+            You haven&apos;t saved any PGs yet. As you explore AplaStay, bookmark accommodations near your college campus to compare rents, amenities, and walking distances side-by-side.
           </p>
 
           <div className="empty-state-btn-group">

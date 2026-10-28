@@ -240,7 +240,7 @@ export default function StudentProfile({
           <div className="profile-privacy-box">
             <div className="privacy-header">
               <IconShield className="w-4 h-4 text-emerald" />
-              <span>CampusNest Privacy Standard</span>
+              <span>AplaStay Privacy Standard</span>
             </div>
             <p className="privacy-text">
               We never disclose passwords, security tokens, or personal phone numbers to unauthorized brokers. 

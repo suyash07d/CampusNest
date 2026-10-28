@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest Admin OTP Verification
+// AplaStay Admin OTP Verification
 // Secure 6-Digit Founder Clearance Verification Modal & Onboarding Finalizer
 // ==========================================================================
 
@@ -303,7 +303,7 @@ export default function AdminOTPVerification({
             <div className="otp-success-summary-box">
               <div className="summary-row">
                 <span className="summary-label">Operator</span>
-                <span className="summary-val">{applicantName || 'CampusNest Admin'}</span>
+                <span className="summary-val">{applicantName || 'AplaStay Admin'}</span>
               </div>
               <div className="summary-row">
                 <span className="summary-label">Access Email</span>

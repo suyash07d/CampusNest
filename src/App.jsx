@@ -19,7 +19,7 @@ import AplaStayCinematicLoader from './components/AplaStayCinematicLoader';
 import { IconGraduationCap, IconX, IconShield } from './components/Icons';
 import './App.css';
 
-function CampusNestContent() {
+function AplaStayContent() {
   const { 
     role, 
     isAdmin,
@@ -146,8 +146,8 @@ function CampusNestContent() {
     return (
       <AplaStayCinematicLoader 
         isReady={!loading}
-        minDuration={2200}
-        maxDuration={3800}
+        minDuration={2800}
+        maxDuration={4500}
         message="Initializing verified campus network..."
         onComplete={() => setInitialMountDone(true)}
       />
@@ -159,8 +159,8 @@ function CampusNestContent() {
     return (
       <AplaStayCinematicLoader 
         isReady={true}
-        minDuration={1800}
-        maxDuration={3200}
+        minDuration={2300}
+        maxDuration={3600}
         message={authTransitionMsg || 'Entering your AplaStay portal...'}
         onComplete={() => setAuthTransitioning(false)}
       />
@@ -391,7 +391,7 @@ function CampusNestContent() {
 function App() {
   return (
     <AuthProvider>
-      <CampusNestContent />
+      <AplaStayContent />
     </AuthProvider>
   );
 }

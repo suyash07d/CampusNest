@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest — Verified Pune Discovery Dataset
+// AplaStay — Verified Pune Discovery Dataset
 // Sources: Savitribai Phule Pune University (SPPU) Affiliated Colleges Directory,
 // Directorate of Technical Education (DTE) Maharashtra Approved Institutes List,
 // UGC Recognized Universities Register, Bar Council of India, Council of Architecture.

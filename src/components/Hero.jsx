@@ -276,6 +276,46 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
       <div className="hero-aurora-glow aurora-cyan" aria-hidden="true" />
       <div className="hero-aurora-glow aurora-emerald" aria-hidden="true" />
       <div className="hero-cosmic-beam" aria-hidden="true" />
+
+      {/* Architectural Campus Skyline & Twilight Atmosphere in Background */}
+      <div className="hero-campus-backdrop" aria-hidden="true">
+        <svg viewBox="0 0 1440 280" fill="none" className="campus-skyline-svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="campusSkyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#1E293B" stopOpacity="0.85" />
+              <stop offset="60%" stopColor="#0F172A" stopOpacity="0.95" />
+              <stop offset="100%" stopColor="#0B0F19" stopOpacity="1" />
+            </linearGradient>
+            <linearGradient id="campusHazeGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+              <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d="M0 280 L0 200 L45 200 L45 155 L105 155 L105 200 L180 200 L180 120 L245 120 L245 200 L360 200 L360 90 L395 65 L430 90 L430 200 L545 200 L545 140 L620 140 L620 200 L710 200 L710 110 L775 110 L775 200 L895 200 L895 85 L935 55 L975 85 L975 200 L1080 200 L1080 150 L1155 150 L1155 200 L1265 200 L1265 130 L1325 130 L1325 200 L1440 200 L1440 280 Z" fill="url(#campusSkyGrad)" />
+          <rect y="190" width="1440" height="90" fill="url(#campusHazeGrad)" />
+
+          {/* Twinkling Geometric Campus Dorm & Library Windows */}
+          <rect x="200" y="135" width="8" height="10" rx="1.5" fill="#FBBF24" className="campus-win win-delay-1" />
+          <rect x="218" y="135" width="8" height="10" rx="1.5" fill="#67E8F9" className="campus-win win-delay-2" />
+          <rect x="200" y="155" width="8" height="10" rx="1.5" fill="#A78BFA" className="campus-win win-delay-3" />
+          <rect x="218" y="155" width="8" height="10" rx="1.5" fill="#FBBF24" className="campus-win win-delay-4" />
+          
+          <rect x="380" y="105" width="9" height="11" rx="1.5" fill="#FBBF24" className="campus-win win-delay-2" />
+          <rect x="400" y="105" width="9" height="11" rx="1.5" fill="#FBBF24" className="campus-win win-delay-1" />
+          <rect x="380" y="130" width="9" height="11" rx="1.5" fill="#67E8F9" className="campus-win win-delay-3" />
+          <rect x="400" y="130" width="9" height="11" rx="1.5" fill="#C084FC" className="campus-win win-delay-4" />
+          
+          <rect x="730" y="125" width="8" height="10" rx="1.5" fill="#FBBF24" className="campus-win win-delay-4" />
+          <rect x="750" y="125" width="8" height="10" rx="1.5" fill="#38BDF8" className="campus-win win-delay-1" />
+          <rect x="730" y="145" width="8" height="10" rx="1.5" fill="#FBBF24" className="campus-win win-delay-2" />
+          <rect x="750" y="145" width="8" height="10" rx="1.5" fill="#67E8F9" className="campus-win win-delay-3" />
+
+          <rect x="915" y="100" width="9" height="11" rx="1.5" fill="#FBBF24" className="campus-win win-delay-1" />
+          <rect x="935" y="100" width="9" height="11" rx="1.5" fill="#C084FC" className="campus-win win-delay-3" />
+          <rect x="915" y="125" width="9" height="11" rx="1.5" fill="#FBBF24" className="campus-win win-delay-2" />
+          <rect x="935" y="125" width="9" height="11" rx="1.5" fill="#67E8F9" className="campus-win win-delay-4" />
+        </svg>
+      </div>
       <div className="hero-stars-particles" aria-hidden="true">
         <span className="cosmic-star star-1" />
         <span className="cosmic-star star-2" />
@@ -899,6 +939,50 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                 <div className="comp-text">
                   <div className="comp-title">Home Mess &amp; Direct Owners</div>
                   <div className="comp-sub">Curated hygienic mess plans • Zero broker commission</div>
+                </div>
+              </div>
+
+              {/* Campus Student Living Showcase Card (Official Brand Identity Integration) */}
+              <div className="campus-living-showcase-card">
+                <div className="showcase-card-inner">
+                  <div className="showcase-header">
+                    <div className="showcase-badge">
+                      <span className="live-campus-dot" />
+                      <span>Verified Pune Campus Living</span>
+                    </div>
+                    <span className="showcase-anchor-tag">45+ SPPU &amp; DTE Campuses Mapped</span>
+                  </div>
+
+                  <div className="showcase-body-grid">
+                    <div className="showcase-headline-group">
+                      <span className="showcase-brand-label">AplaStay Campus Ecosystem</span>
+                      <h3 className="showcase-main-heading">
+                        Your Next Home, Near Your College.
+                      </h3>
+                      <p className="showcase-lead-para">
+                        Discover verified PGs and accommodations built for student life with honest gate walking times, hygienic food options, and direct owner pricing.
+                      </p>
+                    </div>
+
+                    <div className="showcase-features-cluster">
+                      <div className="feature-pill pill-violet">
+                        <span className="feature-dot dot-violet" />
+                        <span className="feature-title">Explore Near Your College</span>
+                      </div>
+                      <div className="feature-pill pill-cyan">
+                        <span className="feature-dot dot-cyan" />
+                        <span className="feature-title">Verified PGs &amp; Listings</span>
+                      </div>
+                      <div className="feature-pill pill-blue">
+                        <span className="feature-dot dot-blue" />
+                        <span className="feature-title">Real Reviews From Students</span>
+                      </div>
+                      <div className="feature-pill pill-pink">
+                        <span className="feature-dot dot-pink" />
+                        <span className="feature-title">Save &amp; Compare Your Favorites</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>

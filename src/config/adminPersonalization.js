@@ -10,8 +10,8 @@ export function getAdminPersonalization(profile) {
     email,
     displayName,
     welcomeGreeting: `Welcome, ${displayName}!`,
-    subGreeting: 'CampusNest Control Center is ready.',
+    subGreeting: 'AplaStay Control Center is ready.',
     badge: 'Administrator',
-    tagline: 'CampusNest Operations',
+    tagline: 'AplaStay Operations',
   };
 }

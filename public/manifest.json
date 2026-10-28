@@ -1,0 +1,16 @@
+{
+  "short_name": "AplaStay",
+  "name": "AplaStay — Find Your Place. Belong to More.",
+  "description": "Verified student PGs and accommodations built for student life in Pune.",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "display": "standalone"
+}

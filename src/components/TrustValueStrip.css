@@ -1,12 +1,13 @@
 /* ==========================================================================
-   CampusNest — Trust / Value Strip Styles
+   AplaStay — Trust / Value Strip Styles
    ========================================================================== */
 
 .trust-strip-section {
   padding: 60px 0 70px;
-  background-color: #FFFFFF;
+  background-color: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.25s ease;
 }
 
 .trust-strip-header {

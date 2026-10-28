@@ -252,7 +252,7 @@ export default function AdminOwners({ onShowNotice }) {
         emptyMessage={
           searchQuery
             ? `No owners matching "${searchQuery}". Clear query to view all property owners.`
-            : 'No property owners have registered on CampusNest yet. Zero demo profiles are created.'
+            : 'No property owners have registered on AplaStay yet. Zero demo profiles are created.'
         }
         emptyIcon={IconBuilding}
         searchPlaceholder="Search owners by name or email..."

@@ -12,7 +12,9 @@ import {
   IconArrowRight, 
   IconLayoutDashboard, 
   IconLogOut,
-  IconShield 
+  IconShield,
+  IconSun,
+  IconMoon 
 } from './Icons';
 import './Navbar.css';
 
@@ -28,6 +30,34 @@ export default function Navbar({
   const { user, profile, role, isAuthenticated, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Dark / Light Mode State with Persistence
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('aplastay-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+      return 'dark'; // Default to AplaStay dark mode
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('aplastay-theme', theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,7 +101,7 @@ export default function Navbar({
             if (onNavigateHome) onNavigateHome();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}>
-            <AplaStayLogo size={36} theme="dark" />
+            <AplaStayLogo size={36} theme={theme} />
           </a>
 
           {/* Desktop Navigation */}
@@ -103,6 +133,21 @@ export default function Navbar({
 
           {/* Desktop Actions */}
           <div className="header-actions">
+            {/* Dark / Light Mode Switcher */}
+            <button
+              type="button"
+              className="btn-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
+              title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {theme === 'dark' ? (
+                <IconSun className="theme-toggle-icon icon-sun" />
+              ) : (
+                <IconMoon className="theme-toggle-icon icon-moon" />
+              )}
+            </button>
+
             {!isAuthenticated ? (
               <>
                 <button 
@@ -236,7 +281,7 @@ export default function Navbar({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mobile-drawer-header">
-                <AplaStayLogo size={32} theme="light" />
+                <AplaStayLogo size={32} theme={theme} />
                 <button 
                   type="button" 
                   className="mobile-close-btn"
@@ -268,6 +313,28 @@ export default function Navbar({
               )}
 
               <div className="mobile-nav-links">
+                {/* Theme Mode Toggle Row */}
+                <div className="mobile-theme-item">
+                  <span className="mobile-theme-label">Theme Mode</span>
+                  <button 
+                    type="button" 
+                    className="mobile-theme-toggle-btn"
+                    onClick={toggleTheme}
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <IconSun className="w-4 h-4 text-amber" />
+                        <span>Dark (Tap for Light)</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconMoon className="w-4 h-4 text-indigo" />
+                        <span>Light (Tap for Dark)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
                 <a 
                   href="#discovery" 
                   className="mobile-nav-link"

@@ -268,7 +268,7 @@ export default function AdminStudents({ onShowNotice }) {
         emptyMessage={
           searchQuery
             ? `No students matching "${searchQuery}". Clear query to view all students.`
-            : 'No students have registered on CampusNest yet. Zero demo profiles are created.'
+            : 'No students have registered on AplaStay yet. Zero demo profiles are created.'
         }
         emptyIcon={IconGraduationCap}
         searchPlaceholder="Search students by name or email..."

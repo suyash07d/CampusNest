@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest Admin Authentication Service
+// AplaStay Admin Authentication Service
 // Secure client-side interaction with Supabase Edge Functions for
 // Founder-Controlled Administrator Onboarding & OTP Lifecycle
 // ==========================================================================
@@ -34,7 +34,7 @@ async function callAdminEdgeFunction(functionName, payload) {
       body: JSON.stringify(payload),
     });
   } catch {
-    const netErr = new Error('Network error: Unable to reach CampusNest authorization gateway. Please verify your connection.');
+    const netErr = new Error('Network error: Unable to reach AplaStay authorization gateway. Please verify your connection.');
     netErr.status = 0;
     throw netErr;
   }

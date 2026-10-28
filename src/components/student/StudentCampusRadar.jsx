@@ -126,7 +126,7 @@ export default function StudentCampusRadar({
           <div className="radar-detail-headline">
             <h3 className="radar-zone-heading">Select Walking Threshold</h3>
             <p className="radar-zone-sub">
-              Never pay extra for fake walking claims. Every listing on CampusNest is verified with on-foot pedestrian routes.
+              Never pay extra for fake walking claims. Every listing on AplaStay is verified with on-foot pedestrian routes.
             </p>
           </div>
 

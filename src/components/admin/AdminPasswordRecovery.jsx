@@ -61,7 +61,7 @@ export default function AdminPasswordRecovery({ mode, email, onEmailChange, onBa
         <h1 className="admin-card-title" id="admin-recovery-title">{isReset ? 'Choose a new password' : 'Reset your password'}</h1>
         <p className="admin-card-subtitle">
           {isReset
-            ? 'Set a new password for your CampusNest administrator account.'
+            ? 'Set a new password for your AplaStay administrator account.'
             : 'Enter your administrator email and we’ll send a link if an account matches.'}
         </p>
       </div>
@@ -92,7 +92,7 @@ export default function AdminPasswordRecovery({ mode, email, onEmailChange, onBa
             <label htmlFor="admin-recovery-email" className="admin-label">Administrator email</label>
             <div className="admin-input-wrapper">
               <IconMail className="input-leading-icon" />
-              <input id="admin-recovery-email" type="email" className="admin-input" placeholder="admin@campusnest.in" value={email} onChange={(event) => onEmailChange(event.target.value)} autoComplete="username" required disabled={isSubmitting || !!notice} />
+              <input id="admin-recovery-email" type="email" className="admin-input" placeholder="admin@aplastay.in" value={email} onChange={(event) => onEmailChange(event.target.value)} autoComplete="username" required disabled={isSubmitting || !!notice} />
             </div>
           </div>
         )}

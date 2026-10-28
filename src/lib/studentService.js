@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest — Student Dashboard Service
+// AplaStay — Student Dashboard Service
 // Supabase Data Access for Saved PGs, Enquiries, and Profile Preferences
 // ==========================================================================
 

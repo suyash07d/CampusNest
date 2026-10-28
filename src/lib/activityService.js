@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest — Student Activity Logger Service
+// AplaStay — Student Activity Logger Service
 // ==========================================================================
 // Privacy & Security Rules:
 // 1. Strictly append-only.

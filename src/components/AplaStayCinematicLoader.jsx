@@ -18,8 +18,8 @@ export default function AplaStayCinematicLoader({
   message = '',
   isReady = true,
   onComplete,
-  minDuration = 2200,
-  maxDuration = 4000
+  minDuration = 2800,
+  maxDuration = 4500
 }) {
   const [minTimeElapsed, setMinTimeElapsed] = useState(false);
   const [forceComplete, setForceComplete] = useState(false);
@@ -175,6 +175,21 @@ export default function AplaStayCinematicLoader({
             ))}
           </div>
 
+          {/* Subtle Campus Architecture Silhouette at Base */}
+          <div className="loader-campus-horizon" aria-hidden="true">
+            <svg viewBox="0 0 1200 180" fill="none" className="loader-campus-svg" preserveAspectRatio="none">
+              <path d="M0 180 L0 140 L40 140 L40 110 L90 110 L90 140 L160 140 L160 90 L220 90 L220 140 L310 140 L310 70 L340 50 L370 70 L370 140 L460 140 L460 100 L520 100 L520 140 L600 140 L600 80 L670 80 L670 140 L760 140 L760 95 L820 95 L820 140 L900 140 L900 65 L940 45 L980 65 L980 140 L1070 140 L1070 105 L1130 105 L1130 140 L1200 140 L1200 180 Z" fill="rgba(8, 14, 32, 0.75)" />
+              <rect x="180" y="105" width="6" height="8" rx="1" fill="#FBBF24" opacity="0.65" className="skyline-window" />
+              <rect x="195" y="105" width="6" height="8" rx="1" fill="#67E8F9" opacity="0.65" className="skyline-window" />
+              <rect x="330" y="85" width="8" height="10" rx="1" fill="#FBBF24" opacity="0.75" className="skyline-window" />
+              <rect x="345" y="85" width="8" height="10" rx="1" fill="#A78BFA" opacity="0.7" className="skyline-window" />
+              <rect x="620" y="98" width="7" height="9" rx="1" fill="#FBBF24" opacity="0.65" className="skyline-window" />
+              <rect x="635" y="98" width="7" height="9" rx="1" fill="#38BDF8" opacity="0.7" className="skyline-window" />
+              <rect x="925" y="80" width="8" height="10" rx="1" fill="#FBBF24" opacity="0.75" className="skyline-window" />
+              <rect x="945" y="80" width="8" height="10" rx="1" fill="#818CF8" opacity="0.7" className="skyline-window" />
+            </svg>
+          </div>
+
           {/* Main Cinematic Core */}
           <div className="cinematic-loader-core">
             
@@ -240,7 +255,7 @@ export default function AplaStayCinematicLoader({
                   filter="url(#cineGlow)"
                   initial={{ fillOpacity: 0 }}
                   animate={{ fillOpacity: 1 }}
-                  transition={{ delay: 0.85, duration: 0.55 }}
+                  transition={{ delay: 1.05, duration: 0.6 }}
                 />
 
                 {/* 2. Animated Outline Stroke Draw (Sequence Step 3: Draw outline) */}
@@ -263,7 +278,7 @@ export default function AplaStayCinematicLoader({
                   strokeLinejoin="round"
                   initial={{ pathLength: 0, opacity: 0 }}
                   animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 1.15, ease: [0.16, 1, 0.3, 1] }}
                 />
 
                 {/* 3. Left Ribbon Fold Wall */}
@@ -279,7 +294,7 @@ export default function AplaStayCinematicLoader({
                   fill="#8B5CF6"
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 0.92, scale: 1 }}
-                  transition={{ delay: 0.75, duration: 0.45 }}
+                  transition={{ delay: 0.95, duration: 0.5 }}
                 />
 
                 {/* 4. Right Ribbon Fold Wall */}
@@ -295,7 +310,7 @@ export default function AplaStayCinematicLoader({
                   fill="#06B6D4"
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 0.92, scale: 1 }}
-                  transition={{ delay: 0.75, duration: 0.45 }}
+                  transition={{ delay: 0.95, duration: 0.5 }}
                 />
 
                 {/* 5. Four Illuminated Window Squares (Sequential illumination) */}
@@ -310,7 +325,7 @@ export default function AplaStayCinematicLoader({
                   filter="url(#windowGlow)"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.92, type: 'spring', stiffness: 500, damping: 22 }}
+                  transition={{ delay: 1.15, type: 'spring', stiffness: 480, damping: 20 }}
                 />
 
                 {/* Window 2: Top-Right */}
@@ -324,7 +339,7 @@ export default function AplaStayCinematicLoader({
                   filter="url(#windowGlow)"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 1.05, type: 'spring', stiffness: 500, damping: 22 }}
+                  transition={{ delay: 1.30, type: 'spring', stiffness: 480, damping: 20 }}
                 />
 
                 {/* Window 3: Bottom-Left */}
@@ -338,7 +353,7 @@ export default function AplaStayCinematicLoader({
                   filter="url(#windowGlow)"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 1.18, type: 'spring', stiffness: 500, damping: 22 }}
+                  transition={{ delay: 1.45, type: 'spring', stiffness: 480, damping: 20 }}
                 />
 
                 {/* Window 4: Bottom-Right */}
@@ -352,7 +367,7 @@ export default function AplaStayCinematicLoader({
                   filter="url(#windowGlow)"
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 1.3, type: 'spring', stiffness: 500, damping: 22 }}
+                  transition={{ delay: 1.60, type: 'spring', stiffness: 480, damping: 20 }}
                 />
 
                 {/* 6. Ripple Rings expanding outward as Pin lands */}
@@ -364,10 +379,11 @@ export default function AplaStayCinematicLoader({
                   strokeWidth="1.5"
                   fill="none"
                   initial={{ r: 2, opacity: 0 }}
-                  animate={{ r: [2, 26], opacity: [0.9, 0] }}
-                  transition={{ delay: 1.62, duration: 0.85, ease: 'easeOut' }}
+                  animate={{ r: [2, 28], opacity: [0.95, 0] }}
+                  transition={{ delay: 1.95, duration: 0.9, ease: 'easeOut' }}
                 />
 
+                {/* Second Wave Ripple */}
                 <motion.circle
                   cx="50"
                   cy="82"
@@ -376,18 +392,18 @@ export default function AplaStayCinematicLoader({
                   strokeWidth="1.2"
                   fill="none"
                   initial={{ r: 2, opacity: 0 }}
-                  animate={{ r: [2, 36], opacity: [0.65, 0] }}
-                  transition={{ delay: 1.76, duration: 0.95, ease: 'easeOut' }}
+                  animate={{ r: [2, 38], opacity: [0.7, 0] }}
+                  transition={{ delay: 2.10, duration: 1.0, ease: 'easeOut' }}
                 />
 
                 {/* 7. Location Pin with smooth Spring Motion */}
                 <motion.g
-                  initial={{ y: -22, scale: 0.35, opacity: 0 }}
+                  initial={{ y: -24, scale: 0.35, opacity: 0 }}
                   animate={{ y: 0, scale: 1, opacity: 1 }}
                   transition={{ 
-                    delay: 1.42, 
+                    delay: 1.75, 
                     type: 'spring', 
-                    stiffness: 440, 
+                    stiffness: 420, 
                     damping: 18 
                   }}
                 >
@@ -408,7 +424,7 @@ export default function AplaStayCinematicLoader({
                     fill="#FFFFFF"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ delay: 1.58, duration: 0.2 }}
+                    transition={{ delay: 1.95, duration: 0.22 }}
                   />
                 </motion.g>
               </svg>
@@ -422,7 +438,7 @@ export default function AplaStayCinematicLoader({
               className="cinematic-text-stack"
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.65, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: 2.10, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             >
               <h2 className="cinematic-brand-wordmark">
                 <span className="wordmark-apla">Apla</span>
@@ -440,7 +456,7 @@ export default function AplaStayCinematicLoader({
                     className="cinematic-progress-bar"
                     initial={{ width: '0%' }}
                     animate={{ width: '100%' }}
-                    transition={{ duration: 1.8, ease: 'easeInOut' }}
+                    transition={{ duration: 2.3, ease: 'easeInOut' }}
                   />
                 </div>
                 <span className="cinematic-status-text">

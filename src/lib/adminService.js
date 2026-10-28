@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest — Admin Intelligence & Control Center Service
+// AplaStay — Admin Intelligence & Control Center Service
 // ==========================================================================
 // Security Rules:
 // 1. All functions verify current user role is 'admin' before executing.
@@ -561,7 +561,7 @@ export async function getSearchDemandSummary() {
 }
 
 /**
- * Retrieve high-level operational counts across the entire CampusNest platform.
+ * Retrieve high-level operational counts across the entire AplaStay platform.
  * Returns authentic counts calculated from real database tables with zero fabricated figures.
  */
 export async function getOverviewMetrics() {

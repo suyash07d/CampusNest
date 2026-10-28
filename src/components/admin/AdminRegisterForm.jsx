@@ -250,7 +250,7 @@ export default function AdminRegisterForm({ onBackToLogin }) {
 
         <div className="admin-badge-pill">
           <IconSparkles className="w-3.5 h-3.5 text-indigo" />
-          <span>CAMPUSNEST CONTROL CENTER</span>
+          <span>APLASTAY CONTROL CENTER</span>
         </div>
 
         <h1 className="admin-card-title">Admin Registration</h1>
@@ -350,7 +350,7 @@ export default function AdminRegisterForm({ onBackToLogin }) {
                 id="reg-email"
                 type="email"
                 className={`admin-input ${fieldErrors.email ? 'has-error' : ''}`}
-                placeholder="admin@campusnest.in"
+                placeholder="admin@aplastay.in"
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 autoComplete="email"

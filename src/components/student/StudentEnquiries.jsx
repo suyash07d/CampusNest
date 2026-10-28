@@ -70,7 +70,7 @@ export default function StudentEnquiries({
 
           <h3 className="empty-state-headline">No Active Enquiries or Campus Visits</h3>
           <p className="empty-state-description">
-            You haven&apos;t sent any enquiries or visit requests yet. When you discover a PG on CampusNest, you can reach out directly to verified hosts to confirm room availability and schedule in-person tours with zero middlemen brokerage.
+            You haven&apos;t sent any enquiries or visit requests yet. When you discover a PG on AplaStay, you can reach out directly to verified hosts to confirm room availability and schedule in-person tours with zero middlemen brokerage.
           </p>
 
           <div className="empty-state-btn-group">

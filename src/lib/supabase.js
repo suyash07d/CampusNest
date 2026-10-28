@@ -11,7 +11,7 @@ const supabasePublishableKey =
 if (!supabaseUrl || !supabasePublishableKey) {
   if (typeof window !== 'undefined') {
     console.warn(
-      'CampusNest: Supabase environment variables missing. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY) are configured in .env.local or your deployment settings.'
+      'AplaStay: Supabase environment variables missing. Ensure VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (or VITE_SUPABASE_ANON_KEY) are configured in .env.local or your deployment settings.'
     );
   }
 }

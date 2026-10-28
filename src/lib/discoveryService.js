@@ -1,5 +1,5 @@
 // ==========================================================================
-// CampusNest — Discovery Service (Supabase + Verified Pune Dataset)
+// AplaStay — Discovery Service (Supabase + Verified Pune Dataset)
 // ==========================================================================
 
 import { supabase } from './supabase.js';
