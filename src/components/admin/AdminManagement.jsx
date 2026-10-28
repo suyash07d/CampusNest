@@ -3,7 +3,7 @@ import { IconCheck, IconMail, IconRefreshCw, IconShield, IconSpinner, IconUsers 
 import { inviteAdministrator, listAdministrators } from '../../lib/adminManagementService';
 import './AdminManagement.css';
 
-export default function AdminManagement({ accessToken }) {
+export default function AdminManagement({ session }) {
   const [administrators, setAdministrators] = useState([]);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,13 +16,13 @@ export default function AdminManagement({ accessToken }) {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      setAdministrators(await listAdministrators(accessToken));
+      setAdministrators(await listAdministrators(session));
     } catch (error) {
       setErrorMessage(error?.message || 'Could not load administrator accounts.');
     } finally {
       setIsLoading(false);
     }
-  }, [accessToken]);
+  }, [session]);
 
   useEffect(() => {
     loadAdministrators();
@@ -44,7 +44,7 @@ export default function AdminManagement({ accessToken }) {
 
     setIsInviting(true);
     try {
-      const result = await inviteAdministrator({ fullName, email }, accessToken);
+      const result = await inviteAdministrator({ fullName, email }, session);
       setSuccessMessage(result.message || `Invitation sent to ${email.trim().toLowerCase()}.`);
       setFullName('');
       setEmail('');

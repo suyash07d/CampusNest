@@ -21,7 +21,7 @@ import { getAdminPersonalization } from '../../config/adminPersonalization';
 import { getOverviewMetrics } from '../../lib/adminService';
 import './AdminShell.css';
 
-export default function AdminShell({ profile, accessToken, onSignOut, onGoHome }) {
+export default function AdminShell({ profile, session, onSignOut, onGoHome }) {
   const [activeSection, setActiveSection] = useState('overview');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [counts, setCounts] = useState({
@@ -272,7 +272,7 @@ export default function AdminShell({ profile, accessToken, onSignOut, onGoHome }
             )}
 
             {activeSection === 'admins' && profile?.can_manage_admins && (
-              <AdminManagement accessToken={accessToken} />
+              <AdminManagement session={session} />
             )}
 
             {activeSection === 'settings' && (
