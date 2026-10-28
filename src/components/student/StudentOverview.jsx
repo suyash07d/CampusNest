@@ -8,8 +8,12 @@ import {
   IconShield, 
   IconSparkles, 
   IconCheck, 
-  IconUser
+  IconUser,
+  IconClock
 } from '../Icons';
+import StudentHousingJourney from './StudentHousingJourney';
+import StudentCampusRadar from './StudentCampusRadar';
+import StudentPreferencesMatrix from './StudentPreferencesMatrix';
 
 export default function StudentOverview({
   user,
@@ -17,6 +21,7 @@ export default function StudentOverview({
   college,
   favourites = [],
   enquiries = [],
+  dataLoading = false,
   onSelectTab,
   onBrowsePGs,
 }) {
@@ -27,19 +32,39 @@ export default function StudentOverview({
 
   return (
     <div className="student-overview-container">
-      {/* 1. Quick Actions Grid */}
+      {/* 1. Gamified Housing Journey 4-Stage Roadmap */}
+      <StudentHousingJourney 
+        college={college}
+        favouritesCount={favourites.length}
+        enquiriesCount={enquiries.length}
+        onNavigateTab={onSelectTab}
+      />
+
+      {/* 2. Interactive Concentric Campus Walking Distance Radar */}
+      <StudentCampusRadar 
+        currentCollege={college}
+        onSelectTab={onSelectTab}
+        onBrowsePGs={onBrowsePGs}
+      />
+
+      {/* 3. Quick Actions Cards Grid */}
       <section className="overview-quick-actions-section" aria-labelledby="quick-actions-heading">
-        <h2 id="quick-actions-heading" className="section-subheading">
-          <IconSparkles className="w-4 h-4 text-indigo" />
-          <span>Quick Actions</span>
-        </h2>
+        <div className="section-header-row">
+          <div>
+            <div className="section-eyebrow">FAST NAVIGATION</div>
+            <h2 id="quick-actions-heading" className="section-subheading">
+              <IconSparkles className="w-4 h-4 text-indigo" />
+              <span>Campus Nest Shortcuts</span>
+            </h2>
+          </div>
+        </div>
 
         <div className="quick-actions-grid">
           {/* Action 1: Discover PGs */}
           <motion.div 
             className="quick-action-card card-action-discover"
-            whileHover={{ y: -3 }}
-            transition={{ duration: 0.15 }}
+            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{ duration: 0.18 }}
           >
             <div className="action-card-header">
               <div className="action-icon-box bg-indigo-glow">
@@ -64,8 +89,8 @@ export default function StudentOverview({
           {/* Action 2: Explore Colleges */}
           <motion.div 
             className="quick-action-card card-action-colleges"
-            whileHover={{ y: -3 }}
-            transition={{ duration: 0.15 }}
+            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{ duration: 0.18 }}
           >
             <div className="action-card-header">
               <div className="action-icon-box bg-emerald-glow">
@@ -90,8 +115,8 @@ export default function StudentOverview({
           {/* Action 3: Saved PGs */}
           <motion.div 
             className="quick-action-card card-action-saved"
-            whileHover={{ y: -3 }}
-            transition={{ duration: 0.15 }}
+            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{ duration: 0.18 }}
           >
             <div className="action-card-header">
               <div className="action-icon-box bg-pink-glow">
@@ -116,8 +141,8 @@ export default function StudentOverview({
           {/* Action 4: My Enquiries */}
           <motion.div 
             className="quick-action-card card-action-enquiries"
-            whileHover={{ y: -3 }}
-            transition={{ duration: 0.15 }}
+            whileHover={{ y: -4, scale: 1.01 }}
+            transition={{ duration: 0.18 }}
           >
             <div className="action-card-header">
               <div className="action-icon-box bg-amber-glow">
@@ -141,7 +166,13 @@ export default function StudentOverview({
         </div>
       </section>
 
-      {/* 2. Main Dashboard Split View */}
+      {/* 4. Student Living & Budget Preferences Matrix */}
+      <StudentPreferencesMatrix 
+        onBrowsePGs={onBrowsePGs}
+        onSelectTab={onSelectTab}
+      />
+
+      {/* 5. Main Dashboard Split View: Saved PGs & Recent Enquiries */}
       <div className="overview-two-col-layout">
         {/* Left Column: Saved PGs & Recent Enquiries */}
         <div className="overview-col-main">
@@ -158,7 +189,8 @@ export default function StudentOverview({
                   className="panel-view-all-btn"
                   onClick={() => onSelectTab('saved')}
                 >
-                  View All →
+                  <span>View All</span>
+                  <IconArrowRight className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -228,7 +260,8 @@ export default function StudentOverview({
                   className="panel-view-all-btn"
                   onClick={() => onSelectTab('enquiries')}
                 >
-                  View All →
+                  <span>View All</span>
+                  <IconArrowRight className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
