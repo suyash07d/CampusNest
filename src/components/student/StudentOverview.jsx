@@ -1,4 +1,5 @@
-import { motion } from 'motion/react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconCompass, 
   IconGraduationCap, 
@@ -8,8 +9,12 @@ import {
   IconShield, 
   IconSparkles, 
   IconCheck, 
-  IconUser,
-  IconClock
+  IconUser, 
+  IconClock,
+  IconSliders,
+  IconKey,
+  IconX,
+  IconMapPin
 } from '../Icons';
 import StudentHousingJourney from './StudentHousingJourney';
 import StudentCampusRadar from './StudentCampusRadar';
@@ -25,154 +30,355 @@ export default function StudentOverview({
   onSelectTab,
   onBrowsePGs,
 }) {
+  const [activeModal, setActiveModal] = useState(null); // 'radar' | 'journey' | 'preferences' | null
+
+  // Journey metrics
+  const stage1Complete = Boolean(college?.id || college?.slug);
+  const stage2Complete = favourites.length > 0;
+  const stage3Complete = enquiries.length > 0;
+  const stage4Complete = stage2Complete && stage3Complete;
+  const completedCount = [stage1Complete, stage2Complete, stage3Complete, stage4Complete].filter(Boolean).length;
+  const progressPercent = Math.round((completedCount / 4) * 100);
+
   const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
   const displayEmail = user?.email || profile?.email || '';
   const displayPhone = profile?.phone || 'Not added';
   const isVerified = profile?.is_verified ?? false;
+  const collegeName = college?.shortName || college?.name || 'Pune Campus';
+
+  // Lock scroll when modal is active
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setActiveModal(null);
+    };
+    if (activeModal) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeModal]);
 
   return (
     <div className="student-overview-container">
-      {/* 1. Gamified Housing Journey 4-Stage Roadmap */}
-      <StudentHousingJourney 
-        college={college}
-        favouritesCount={favourites.length}
-        enquiriesCount={enquiries.length}
-        onNavigateTab={onSelectTab}
-      />
+      {/* ====================================================================
+          POPUP MODAL SYSTEM (Smooth Spring Animations on Card Click)
+          ==================================================================== */}
+      <AnimatePresence>
+        {activeModal && (
+          <motion.div 
+            className="student-popup-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveModal(null)}
+          >
+            <motion.div 
+              className="student-popup-modal-window"
+              initial={{ opacity: 0, scale: 0.92, y: 30 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.94, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Top Bar */}
+              <div className="student-popup-modal-header">
+                <div className="modal-title-stack">
+                  <div className="modal-category-badge">
+                    {activeModal === 'radar' && <><IconCompass className="w-4 h-4 text-emerald" /><span>INTERACTIVE CAMPUS RADAR</span></>}
+                    {activeModal === 'journey' && <><IconGraduationCap className="w-4 h-4 text-indigo" /><span>HOUSING JOURNEY ROADMAP</span></>}
+                    {activeModal === 'preferences' && <><IconSliders className="w-4 h-4 text-purple" /><span>BUDGET &amp; AMENITIES MATRIX</span></>}
+                  </div>
+                  <h3 className="modal-title-main">
+                    {activeModal === 'radar' && `Walking Distance Radar — ${collegeName}`}
+                    {activeModal === 'journey' && '4-Stage Student Housing Journey'}
+                    {activeModal === 'preferences' && 'Living & Budget Preferences'}
+                  </h3>
+                </div>
 
-      {/* 2. Interactive Concentric Campus Walking Distance Radar */}
-      <StudentCampusRadar 
-        currentCollege={college}
-        onSelectTab={onSelectTab}
-        onBrowsePGs={onBrowsePGs}
-      />
+                <button 
+                  type="button" 
+                  className="btn-popup-close"
+                  onClick={() => setActiveModal(null)}
+                  title="Close popup (Esc)"
+                  aria-label="Close"
+                >
+                  <IconX className="w-5 h-5" />
+                </button>
+              </div>
 
-      {/* 3. Quick Actions Cards Grid */}
-      <section className="overview-quick-actions-section" aria-labelledby="quick-actions-heading">
-        <div className="section-header-row">
+              {/* Modal Component Body */}
+              <div className="student-popup-modal-body">
+                {activeModal === 'radar' && (
+                  <StudentCampusRadar 
+                    currentCollege={college}
+                    onSelectTab={(tab) => {
+                      setActiveModal(null);
+                      onSelectTab(tab);
+                    }}
+                    onBrowsePGs={() => {
+                      setActiveModal(null);
+                      onBrowsePGs?.();
+                    }}
+                  />
+                )}
+
+                {activeModal === 'journey' && (
+                  <StudentHousingJourney 
+                    college={college}
+                    favouritesCount={favourites.length}
+                    enquiriesCount={enquiries.length}
+                    onNavigateTab={(tab) => {
+                      setActiveModal(null);
+                      onSelectTab(tab);
+                    }}
+                  />
+                )}
+
+                {activeModal === 'preferences' && (
+                  <StudentPreferencesMatrix 
+                    onBrowsePGs={() => {
+                      setActiveModal(null);
+                      onBrowsePGs?.();
+                    }}
+                    onSelectTab={(tab) => {
+                      setActiveModal(null);
+                      onSelectTab(tab);
+                    }}
+                  />
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ====================================================================
+          1. COMPRESSED INTERACTIVE FEATURE HUB (Bite-sized, animated cards)
+          ==================================================================== */}
+      <section className="overview-compressed-hub" aria-label="Interactive Feature Hub">
+        <div className="compressed-hub-header">
           <div>
-            <div className="section-eyebrow">FAST NAVIGATION</div>
-            <h2 id="quick-actions-heading" className="section-subheading">
+            <div className="section-eyebrow">FAST ACCESS DASHBOARD</div>
+            <h2 className="compressed-hub-title">
               <IconSparkles className="w-4 h-4 text-indigo" />
-              <span>Campus Nest Shortcuts</span>
+              <span>Campus Nest Feature Hub</span>
             </h2>
           </div>
+          <span className="compressed-hub-hint">Tap any box to expand full interactive view</span>
         </div>
 
-        <div className="quick-actions-grid">
-          {/* Action 1: Discover PGs */}
+        <div className="compressed-hub-grid">
+          {/* Card 1: Interactive Campus Radar Card */}
           <motion.div 
-            className="quick-action-card card-action-discover"
-            whileHover={{ y: -4, scale: 1.01 }}
-            transition={{ duration: 0.18 }}
+            className="compressed-feature-card card-radar-glow"
+            whileHover={{ y: -4, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('radar')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('radar'); }}
           >
-            <div className="action-card-header">
-              <div className="action-icon-box bg-indigo-glow">
-                <IconCompass className="w-5 h-5 text-indigo" />
-              </div>
-              <span className="action-tag">Verified Listings</span>
+            <div className="compressed-card-top">
+              <span className="compressed-card-badge badge-emerald">
+                <span className="live-radar-dot" />
+                <span>CAMPUS RADAR</span>
+              </span>
+              <span className="compressed-expand-hint">↗ Tap to Open</span>
             </div>
-            <h3 className="action-card-title">Discover PGs</h3>
-            <p className="action-card-desc">
-              Browse student accommodations measured in walking minutes from your university gates.
-            </p>
-            <button 
-              type="button" 
-              className="action-card-btn btn-primary"
-              onClick={() => onSelectTab('discover')}
-            >
-              <span>Explore PGs</span>
-              <IconArrowRight className="w-4 h-4" />
-            </button>
+
+            <div className="card-center-preview">
+              {/* Mini Animated Radar Graphic */}
+              <div className="mini-radar-visual">
+                <div className="mini-radar-ring ring-3" />
+                <div className="mini-radar-ring ring-2" />
+                <div className="mini-radar-ring ring-1" />
+                <div className="mini-radar-scan-line" />
+                <div className="mini-radar-center-dot" />
+                <div className="mini-radar-ping ping-1" />
+                <div className="mini-radar-ping ping-2" />
+              </div>
+
+              <div className="mini-radar-content">
+                <h3 className="compressed-card-title">Walking Distance Radar</h3>
+                <p className="compressed-card-desc">
+                  Honest walking minutes (5m, 10m, 15m) from <strong>{collegeName}</strong> gates.
+                </p>
+                <div className="mini-zone-pills">
+                  <span className="zone-pill pill-5m">5m (400m)</span>
+                  <span className="zone-pill pill-10m">10m (800m)</span>
+                  <span className="zone-pill pill-15m">15m (1.2km)</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="compressed-card-footer">
+              <span className="footer-action-text">Explore gate perimeter PGs</span>
+              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            </div>
           </motion.div>
 
-          {/* Action 2: Explore Colleges */}
+          {/* Card 2: Housing Journey Pipeline Card */}
           <motion.div 
-            className="quick-action-card card-action-colleges"
-            whileHover={{ y: -4, scale: 1.01 }}
-            transition={{ duration: 0.18 }}
+            className="compressed-feature-card card-journey-glow"
+            whileHover={{ y: -4, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('journey')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('journey'); }}
           >
-            <div className="action-card-header">
-              <div className="action-icon-box bg-emerald-glow">
-                <IconGraduationCap className="w-5 h-5 text-emerald" />
-              </div>
-              <span className="action-tag">Pune Directory</span>
+            <div className="compressed-card-top">
+              <span className="compressed-card-badge badge-indigo">
+                <IconGraduationCap className="w-3.5 h-3.5" />
+                <span>HOUSING ROADMAP</span>
+              </span>
+              <span className="compressed-expand-hint">↗ Tap to Open</span>
             </div>
-            <h3 className="action-card-title">Explore Colleges</h3>
-            <p className="action-card-desc">
-              Search 45+ premier institutes across Shivajinagar, Kothrud, Hinjawadi, and PCMC.
-            </p>
-            <button 
-              type="button" 
-              className="action-card-btn btn-secondary"
-              onClick={() => onSelectTab('discover')}
-            >
-              <span>View Campuses</span>
-              <IconArrowRight className="w-4 h-4" />
-            </button>
+
+            <div className="card-center-preview">
+              <div className="journey-summary-bar">
+                <div className="journey-summary-numbers">
+                  <span className="journey-stage-text">Stage {completedCount} of 4 Completed</span>
+                  <span className="journey-percent-text">{progressPercent}%</span>
+                </div>
+                <div className="journey-mini-progress-track">
+                  <motion.div 
+                    className="journey-mini-progress-fill" 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                  />
+                </div>
+              </div>
+
+              <h3 className="compressed-card-title">4-Stage Move-In Pipeline</h3>
+              <p className="compressed-card-desc">
+                Gamified milestones from picking campus to zero-brokerage key handover.
+              </p>
+
+              <div className="journey-mini-steps-row">
+                <span className={`step-chip ${stage1Complete ? 'is-done' : ''}`}>01 Campus {stage1Complete ? '✓' : ''}</span>
+                <span className={`step-chip ${stage2Complete ? 'is-done' : ''}`}>02 Shortlist {stage2Complete ? '✓' : ''}</span>
+                <span className={`step-chip ${stage3Complete ? 'is-done' : ''}`}>03 Visits {stage3Complete ? '✓' : ''}</span>
+                <span className={`step-chip ${stage4Complete ? 'is-done' : ''}`}>04 Move-In</span>
+              </div>
+            </div>
+
+            <div className="compressed-card-footer">
+              <span className="footer-action-text">View full roadmap details</span>
+              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            </div>
           </motion.div>
 
-          {/* Action 3: Saved PGs */}
+          {/* Card 3: Preferences & Budget Matrix Card */}
           <motion.div 
-            className="quick-action-card card-action-saved"
-            whileHover={{ y: -4, scale: 1.01 }}
-            transition={{ duration: 0.18 }}
+            className="compressed-feature-card card-pref-glow"
+            whileHover={{ y: -4, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            onClick={() => setActiveModal('preferences')}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveModal('preferences'); }}
           >
-            <div className="action-card-header">
-              <div className="action-icon-box bg-pink-glow">
-                <IconHeart className="w-5 h-5 text-pink" />
-              </div>
-              <span className="action-tag">{favourites.length} Shortlisted</span>
+            <div className="compressed-card-top">
+              <span className="compressed-card-badge badge-purple">
+                <IconSliders className="w-3.5 h-3.5" />
+                <span>LIVING MATRIX</span>
+              </span>
+              <span className="compressed-expand-hint">↗ Tap to Open</span>
             </div>
-            <h3 className="action-card-title">Saved PGs</h3>
-            <p className="action-card-desc">
-              Compare rents, amenities, curfew rules, and mess meals side-by-side.
-            </p>
-            <button 
-              type="button" 
-              className="action-card-btn btn-secondary"
-              onClick={() => onSelectTab('saved')}
-            >
-              <span>View Saved</span>
-              <IconArrowRight className="w-4 h-4" />
-            </button>
-          </motion.div>
 
-          {/* Action 4: My Enquiries */}
-          <motion.div 
-            className="quick-action-card card-action-enquiries"
-            whileHover={{ y: -4, scale: 1.01 }}
-            transition={{ duration: 0.18 }}
-          >
-            <div className="action-card-header">
-              <div className="action-icon-box bg-amber-glow">
-                <IconMail className="w-5 h-5 text-amber" />
+            <div className="card-center-preview">
+              <h3 className="compressed-card-title">Living &amp; Budget Matrix</h3>
+              <p className="compressed-card-desc">
+                Tailor accommodation rates, mess food, and room amenities.
+              </p>
+
+              <div className="pref-mini-chips-grid">
+                <span className="pref-mini-chip">💰 ₹8k – ₹13k/mo</span>
+                <span className="pref-mini-chip">📶 High-Speed Wi-Fi</span>
+                <span className="pref-mini-chip">🚿 Attached Bath</span>
+                <span className="pref-mini-chip">🌙 Flexible Curfew</span>
               </div>
-              <span className="action-tag">{enquiries.length} Active</span>
             </div>
-            <h3 className="action-card-title">My Enquiries</h3>
-            <p className="action-card-desc">
-              Track your scheduled property visits and direct conversations with verified hosts.
-            </p>
-            <button 
-              type="button" 
-              className="action-card-btn btn-secondary"
-              onClick={() => onSelectTab('enquiries')}
-            >
-              <span>Check Status</span>
-              <IconArrowRight className="w-4 h-4" />
-            </button>
+
+            <div className="compressed-card-footer">
+              <span className="footer-action-text">Customize budget &amp; amenities</span>
+              <span className="footer-action-icon"><IconArrowRight className="w-4 h-4" /></span>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* 4. Student Living & Budget Preferences Matrix */}
-      <StudentPreferencesMatrix 
-        onBrowsePGs={onBrowsePGs}
-        onSelectTab={onSelectTab}
-      />
+      {/* ====================================================================
+          2. QUICK ACTIONS SHORTCUT BAR (Compact 4-column strip)
+          ==================================================================== */}
+      <section className="overview-quick-strip" aria-label="Campus Nest Shortcuts">
+        <button 
+          type="button" 
+          className="quick-strip-btn btn-strip-discover"
+          onClick={() => onSelectTab('discover')}
+        >
+          <div className="strip-icon-box bg-indigo-glow">
+            <IconCompass className="w-4 h-4 text-indigo" />
+          </div>
+          <div className="strip-text-stack">
+            <strong>Discover PGs</strong>
+            <span>Verified near campus</span>
+          </div>
+        </button>
 
-      {/* 5. Main Dashboard Split View: Saved PGs & Recent Enquiries */}
+        <button 
+          type="button" 
+          className="quick-strip-btn btn-strip-colleges"
+          onClick={() => onSelectTab('discover')}
+        >
+          <div className="strip-icon-box bg-emerald-glow">
+            <IconGraduationCap className="w-4 h-4 text-emerald" />
+          </div>
+          <div className="strip-text-stack">
+            <strong>45+ Colleges</strong>
+            <span>Pune campuses</span>
+          </div>
+        </button>
+
+        <button 
+          type="button" 
+          className="quick-strip-btn btn-strip-saved"
+          onClick={() => onSelectTab('saved')}
+        >
+          <div className="strip-icon-box bg-pink-glow">
+            <IconHeart className="w-4 h-4 text-pink" />
+          </div>
+          <div className="strip-text-stack">
+            <strong>Saved PGs ({favourites.length})</strong>
+            <span>Compare shortlists</span>
+          </div>
+        </button>
+
+        <button 
+          type="button" 
+          className="quick-strip-btn btn-strip-enquiries"
+          onClick={() => onSelectTab('enquiries')}
+        >
+          <div className="strip-icon-box bg-amber-glow">
+            <IconMail className="w-4 h-4 text-amber" />
+          </div>
+          <div className="strip-text-stack">
+            <strong>Enquiries ({enquiries.length})</strong>
+            <span>Visits &amp; messages</span>
+          </div>
+        </button>
+      </section>
+
+      {/* ====================================================================
+          3. MAIN DASHBOARD SPLIT VIEW: Saved Accommodations & Activity
+          ==================================================================== */}
       <div className="overview-two-col-layout">
         {/* Left Column: Saved PGs & Recent Enquiries */}
         <div className="overview-col-main">
@@ -198,11 +404,11 @@ export default function StudentOverview({
             {favourites.length === 0 ? (
               <div className="dashboard-empty-state">
                 <div className="empty-state-icon-box bg-pink-glow">
-                  <IconHeart className="w-6 h-6 text-pink" />
+                  <IconHeart className="w-5 h-5 text-pink" />
                 </div>
                 <h4 className="empty-state-title">Your PG Wishlist is Empty</h4>
                 <p className="empty-state-text">
-                  You haven&apos;t saved any PGs yet. Bookmark verified student hostels near your campus to compare room rates, food options, and gate walking times.
+                  Bookmark verified student hostels near your campus to compare room rates, food options, and gate walking times.
                 </p>
                 <div className="empty-state-actions">
                   <button 
@@ -213,15 +419,6 @@ export default function StudentOverview({
                     <IconCompass className="w-4 h-4" />
                     <span>Discover PGs Near Campus</span>
                   </button>
-                  {onBrowsePGs && (
-                    <button 
-                      type="button" 
-                      className="btn-empty-cta secondary"
-                      onClick={onBrowsePGs}
-                    >
-                      <span>Explore Home Radar</span>
-                    </button>
-                  )}
                 </div>
               </div>
             ) : (
@@ -252,7 +449,7 @@ export default function StudentOverview({
             <div className="panel-card-header">
               <div className="panel-header-title">
                 <IconMail className="w-5 h-5 text-amber" />
-                <h3>Recent Enquiries & Visits ({enquiries.length})</h3>
+                <h3>Recent Enquiries &amp; Visits ({enquiries.length})</h3>
               </div>
               {enquiries.length > 0 && (
                 <button 
@@ -269,11 +466,11 @@ export default function StudentOverview({
             {enquiries.length === 0 ? (
               <div className="dashboard-empty-state">
                 <div className="empty-state-icon-box bg-amber-glow">
-                  <IconMail className="w-6 h-6 text-amber" />
+                  <IconMail className="w-5 h-5 text-amber" />
                 </div>
-                <h4 className="empty-state-title">No Active Enquiries or Visit Requests</h4>
+                <h4 className="empty-state-title">No Active Visit Requests</h4>
                 <p className="empty-state-text">
-                  Direct host inquiries and campus visit bookings will be tracked here with full transparency and zero middlemen brokerage.
+                  Direct host inquiries and campus visit bookings will be tracked here with zero middlemen brokerage.
                 </p>
                 <div className="empty-state-actions">
                   <button 
@@ -407,7 +604,7 @@ export default function StudentOverview({
               onClick={() => onSelectTab('profile')}
             >
               <IconUser className="w-4 h-4" />
-              <span>Edit Profile & Preferences</span>
+              <span>Edit Profile &amp; Preferences</span>
             </button>
           </section>
 
