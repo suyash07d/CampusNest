@@ -130,28 +130,23 @@ Deno.serve(async (req: Request) => {
 
     const existingProfile = profileRows && profileRows.length > 0 ? profileRows[0] : null;
 
-    if (existingProfile?.role === 'admin') {
-      return jsonResponse({ error: 'This person is already an active administrator.' }, 409, headers);
-    }
-
-    // Also check auth users
+    // Check auth users
     let existingAuthUser = null;
     try {
       const { data: authData } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 });
       existingAuthUser = authData?.users?.find((u) => (u.email || '').toLowerCase() === email) || null;
-      if (existingAuthUser?.user_metadata?.role === 'admin') {
-        return jsonResponse({ error: 'This person is already an active administrator.' }, 409, headers);
-      }
     } catch (listErr) {
       console.warn('Auth user list check notice:', listErr);
     }
 
     const siteUrl = (Deno.env.get('SITE_URL') || 'https://campus-nest-plum.vercel.app').replace(/\/$/, '');
+    let actionLink: string | null = null;
 
-    // 2. If user already exists (e.g. owner or student), promote them to administrator
     if (existingProfile || existingAuthUser) {
+      // User ALREADY exists in CampusNest!
       const targetUserId = existingProfile?.id || existingAuthUser?.id;
 
+      // Ensure they have the admin role in profiles
       const { error: upgradeProfileErr } = await supabaseAdmin
         .from('profiles')
         .upsert({
@@ -168,6 +163,7 @@ Deno.serve(async (req: Request) => {
         return jsonResponse({ error: 'The administrator account could not be finalized. Please try again.' }, 500, headers);
       }
 
+      // Update auth user metadata
       try {
         await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
           user_metadata: {
@@ -177,6 +173,22 @@ Deno.serve(async (req: Request) => {
         });
       } catch (authMetaErr) {
         console.warn('Auth user metadata update notice:', authMetaErr);
+      }
+
+      // Generate direct setup link for existing user to set or reset their password
+      try {
+        const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'recovery',
+          email,
+          options: {
+            redirectTo: `${siteUrl}/admin`,
+          },
+        });
+        if (!linkErr && linkData?.properties?.action_link) {
+          actionLink = linkData.properties.action_link;
+        }
+      } catch (recoveryErr) {
+        console.warn('generateLink recovery notice:', recoveryErr);
       }
 
       await supabaseAdmin.from('admin_access_events').insert({
@@ -189,76 +201,81 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({
         success: true,
         email,
-        promoted: true,
-        message: `${fullName || existingProfile?.full_name || email} has been granted administrator access.`,
+        invite_link: actionLink,
+        message: `${fullName || existingProfile?.full_name || email} has been granted administrator access. Share the setup link below with them so they can choose their password.`,
       }, 200, headers);
-    }
-
-    // 3. Brand new user - dispatch email invitation or fallback to generateLink
-    let invitedUserId: string | null = null;
-    let inviteNotice = '';
-
-    const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: { full_name: fullName, role: 'admin' },
-      redirectTo: `${siteUrl}/admin`,
-    });
-
-    if (!inviteError && inviteData?.user) {
-      invitedUserId = inviteData.user.id;
-      inviteNotice = `Invitation sent to ${email}. They’ll receive a secure email link to set their password.`;
     } else {
-      console.warn('inviteUserByEmail notice, trying generateLink fallback:', inviteError?.message);
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'invite',
-        email,
-        options: {
+      // BRAND NEW USER
+      let invitedUserId: string | null = null;
+
+      // 1. Generate direct invite link
+      try {
+        const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'invite',
+          email,
+          options: {
+            data: { full_name: fullName, role: 'admin' },
+            redirectTo: `${siteUrl}/admin`,
+          },
+        });
+        if (!linkErr && linkData?.properties?.action_link) {
+          actionLink = linkData.properties.action_link;
+          invitedUserId = linkData.user?.id || null;
+        }
+      } catch (inviteErr) {
+        console.warn('generateLink invite notice:', inviteErr);
+      }
+
+      // 2. Also try sending standard invite email via Supabase
+      try {
+        const { data: inviteData } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
           data: { full_name: fullName, role: 'admin' },
           redirectTo: `${siteUrl}/admin`,
-        },
+        });
+        if (inviteData?.user && !invitedUserId) {
+          invitedUserId = inviteData.user.id;
+        }
+      } catch (emailErr) {
+        console.warn('inviteUserByEmail notice:', emailErr);
+      }
+
+      if (!invitedUserId) {
+        return jsonResponse({
+          error: 'Could not create administrator invitation link. Please verify the email and try again.',
+        }, 500, headers);
+      }
+
+      // Upsert profile
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .upsert({
+          id: invitedUserId,
+          full_name: fullName,
+          email,
+          role: 'admin',
+          is_verified: true,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' });
+
+      if (profileError) {
+        console.error('Admin invite profile provisioning failed:', profileError.message);
+        return jsonResponse({ error: 'The administrator account could not be finalized. Please try again.' }, 500, headers);
+      }
+
+      await supabaseAdmin.from('admin_access_events').insert({
+        actor_id: caller.id,
+        target_email: email,
+        action: 'invite_sent',
+        ip_address: clientIp,
       });
 
-      if (!linkError && linkData?.user) {
-        invitedUserId = linkData.user.id;
-        inviteNotice = `Administrator account created for ${email}.`;
-      } else {
-        console.error('Admin invitation failed:', inviteError?.message, linkError?.message);
-        const conflict = inviteError?.code === 'email_exists' || inviteError?.status === 422;
-        return jsonResponse({
-          error: conflict
-            ? 'This email is already registered with a CampusNest account.'
-            : (inviteError?.message || linkError?.message || 'The invitation email could not be sent. Please check Supabase email settings.'),
-        }, conflict ? 409 : 502, headers);
-      }
-    }
-
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
-        id: invitedUserId,
-        full_name: fullName,
+      return jsonResponse({
+        success: true,
         email,
-        role: 'admin',
-        is_verified: true,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'id' });
-
-    if (profileError) {
-      console.error('Admin invite profile provisioning failed:', profileError.message);
-      return jsonResponse({ error: 'The invite could not be finalized. Please try again.' }, 500, headers);
+        invite_link: actionLink,
+        message: `Administrator invitation created for ${email}. Share the secure link below so they can set their password.`,
+      }, 200, headers);
     }
-
-    await supabaseAdmin.from('admin_access_events').insert({
-      actor_id: caller.id,
-      target_email: email,
-      action: 'invite_sent',
-      ip_address: clientIp,
-    });
-
-    return jsonResponse({
-      success: true,
-      email,
-      message: inviteNotice || `Invitation sent to ${email}.`,
-    }, 200, headers);
   } catch (error) {
     console.error('Admin management request failed:', error instanceof Error ? error.message : String(error));
     return jsonResponse({ error: 'Administrator management is temporarily unavailable.' }, 500, headers);

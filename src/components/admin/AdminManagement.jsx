@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { IconCheck, IconMail, IconRefreshCw, IconShield, IconSpinner, IconUsers } from '../Icons';
+import { IconCheck, IconCopy, IconMail, IconRefreshCw, IconShield, IconSparkles, IconSpinner, IconUsers } from '../Icons';
 import { inviteAdministrator, listAdministrators } from '../../lib/adminManagementService';
 import './AdminManagement.css';
 
@@ -11,6 +11,8 @@ export default function AdminManagement({ session }) {
   const [isInviting, setIsInviting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const loadAdministrators = useCallback(async () => {
     setIsLoading(true);
@@ -27,6 +29,17 @@ export default function AdminManagement({ session }) {
   useEffect(() => {
     loadAdministrators();
   }, [loadAdministrators]);
+
+  const handleCopyLink = async () => {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      console.warn('Clipboard copy notice:', err);
+    }
+  };
 
   const handleInvite = async (event) => {
     event.preventDefault();
@@ -54,7 +67,10 @@ export default function AdminManagement({ session }) {
     setIsInviting(true);
     try {
       const result = await inviteAdministrator({ fullName: cleanName, email: cleanEmail }, session);
-      setSuccessMessage(result.message || `Invitation sent to ${cleanEmail}.`);
+      setSuccessMessage(result.message || `Invitation ready for ${cleanEmail}.`);
+      if (result.invite_link) {
+        setInviteLink(result.invite_link);
+      }
       setFullName('');
       setEmail('');
       await loadAdministrators();
@@ -91,6 +107,55 @@ export default function AdminManagement({ session }) {
 
           {errorMessage && <div className="admin-management-alert is-error" role="alert">{errorMessage}</div>}
           {successMessage && <div className="admin-management-alert is-success" role="status"><IconCheck />{successMessage}</div>}
+
+          {inviteLink && (
+            <div className="admin-invite-link-box">
+              <div className="invite-link-header">
+                <IconSparkles className="w-4 h-4 text-emerald" />
+                <strong>Direct Setup Link Ready</strong>
+              </div>
+              <p className="invite-link-desc">
+                Share this secure link with the administrator. When they click it, they can immediately set their password and log in:
+              </p>
+              <div className="invite-link-row">
+                <input
+                  type="text"
+                  readOnly
+                  value={inviteLink}
+                  className="invite-link-input"
+                  onClick={(e) => e.target.select()}
+                />
+                <button
+                  type="button"
+                  className={`btn-copy-link ${copied ? 'is-copied' : ''}`}
+                  onClick={handleCopyLink}
+                >
+                  {copied ? (
+                    <><IconCheck className="w-4 h-4" /><span>Copied!</span></>
+                  ) : (
+                    <><IconCopy className="w-4 h-4" /><span>Copy link</span></>
+                  )}
+                </button>
+              </div>
+              <div className="invite-link-actions">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hello! Here is your CampusNest Administrator setup link: ${inviteLink}\nClick this link to set your password and access the admin dashboard.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-share-whatsapp"
+                >
+                  <span>Share via WhatsApp</span>
+                </a>
+                <button
+                  type="button"
+                  className="btn-dismiss-link"
+                  onClick={() => setInviteLink('')}
+                >
+                  <span>Dismiss</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           <form className="admin-invite-form" onSubmit={handleInvite}>
             <label className="admin-invite-field">
