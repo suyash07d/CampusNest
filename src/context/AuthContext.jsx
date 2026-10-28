@@ -62,6 +62,9 @@ export function AuthProvider({ children }) {
 
       if (error && error.code !== 'PGRST116') {
         console.warn('Notice querying profiles table:', error.message);
+        // A failed lookup does not mean this user is a student. Preserve any
+        // known profile and let the caller retry instead of inventing a role.
+        return null;
       }
 
       if (data) {
@@ -107,7 +110,6 @@ export function AuthProvider({ children }) {
       return null;
     } catch (err) {
       console.error('Error in fetchProfile:', err);
-      setProfile(null);
       return null;
     }
   }, []);
@@ -299,14 +301,16 @@ export function AuthProvider({ children }) {
       .maybeSingle();
 
     if (profileErr) {
-      await signOut();
       throw new Error('Authorization check failed. Please check network connectivity.');
     }
 
     // 3. Strict Role Verification: MUST be 'admin'
     if (!profileRow || profileRow.role !== 'admin') {
-      // Immediately revoke session to prevent any non-admin access
-      await signOut();
+      // Keep the authenticated session so returning to the student portal
+      // does not require another login. AdminShell still requires role=admin.
+      setUser(data.user);
+      setSession(data.session);
+      setProfile(profileRow);
       const detectedRole = profileRow?.role || 'user';
       throw new Error(`Admin access required. Account authenticated as "${detectedRole}", but lacks administrative privileges.`);
     }

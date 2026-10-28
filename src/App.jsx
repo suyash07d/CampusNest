@@ -62,24 +62,6 @@ function CampusNestContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Strict Admin Route Guard:
-  // If navigating to /admin while authenticated as non-admin (student/owner),
-  // immediately terminate the session and show clear security notice.
-  useEffect(() => {
-    let isMounted = true;
-    const cleanPath = (pathname || '').replace(/\/+$/, '') || '/';
-    if (cleanPath === '/admin' && isAuthenticated && !isAdmin && !loading) {
-      signOut().then(() => {
-        if (isMounted) {
-          setAdminSecurityNotice(`Admin access required. Your ${role || 'non-admin'} session was safely terminated.`);
-        }
-      });
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [pathname, isAuthenticated, isAdmin, loading, role, signOut]);
-
   // Navigation state for public portal:
   // When authenticated, default view is 'dashboard' (for email confirmation & login).
   // Authenticated users can freely toggle to 'home' to explore PGs and back.
@@ -196,7 +178,9 @@ function CampusNestContent() {
         onUpdatePassword={updateRecoveredPassword}
         onCancelPasswordRecovery={signOut}
         onGoHome={() => navigateTo('/')}
-        securityNotice={adminSecurityNotice}
+        securityNotice={isAuthenticated && !isAdmin
+          ? 'This session does not have administrator access. Your current session is still active.'
+          : adminSecurityNotice}
       />
     );
   }
