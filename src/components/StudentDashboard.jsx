@@ -1,100 +1,228 @@
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
+import { PUNE_COLLEGES, PUNE_AREAS } from '../data/puneDiscoveryData';
 import { 
-  IconGraduationCap, 
-  IconMapPin, 
-  IconHeart, 
-  IconShield, 
-  IconArrowRight, 
-  IconLogOut 
-} from './Icons';
+  getStudentSavedPGs, 
+  getStudentEnquiries, 
+  removeStudentSavedPG, 
+  updateStudentProfile 
+} from '../lib/studentService';
+
+import StudentHeader from './student/StudentHeader';
+import StudentNavigation from './student/StudentNavigation';
+import StudentOverview from './student/StudentOverview';
+import StudentDiscovery from './student/StudentDiscovery';
+import StudentSaved from './student/StudentSaved';
+import StudentEnquiries from './student/StudentEnquiries';
+import StudentProfile from './student/StudentProfile';
+
 import './StudentDashboard.css';
 
 export default function StudentDashboard({ onBrowsePGs }) {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, refreshProfile, signOut } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState('overview');
+  const [favourites, setFavourites] = useState([]);
+  const [enquiries, setEnquiries] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
 
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
-  const displayEmail = user?.email || profile?.email || '';
+  // Load real student favourites and enquiries from Supabase
+  useEffect(() => {
+    let isMounted = true;
+    if (!user?.id) {
+      return;
+    }
+
+    Promise.all([
+      getStudentSavedPGs(user.id),
+      getStudentEnquiries(user.id),
+    ]).then(([favRes, enqRes]) => {
+      if (isMounted) {
+        setFavourites(favRes.favourites || []);
+        setEnquiries(enqRes.enquiries || []);
+        setDataLoading(false);
+      }
+    }).catch(err => {
+      console.warn('Dashboard data fetch notification:', err);
+      if (isMounted) {
+        setDataLoading(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
+
+  // Resolve active student's college anchor from PUNE_COLLEGES or profile metadata
+  const currentCollege = useMemo(() => {
+    const collegeIdOrSlug = profile?.college_id || user?.user_metadata?.college_id;
+    if (!collegeIdOrSlug) return null;
+
+    const matched = PUNE_COLLEGES.find(
+      c => c.id === collegeIdOrSlug || c.slug === collegeIdOrSlug
+    );
+    if (matched) {
+      const area = PUNE_AREAS.find(a => a.slug === matched.areaSlug);
+      return {
+        ...matched,
+        areaName: area?.name || matched.areaSlug,
+      };
+    }
+
+    return null;
+  }, [profile?.college_id, user?.user_metadata?.college_id]);
+
+  // Handler: Set / change primary campus anchor
+  const handleAnchorCollege = async (college) => {
+    if (!user?.id) return;
+    try {
+      await updateStudentProfile(user.id, { college_id: college.id });
+      if (refreshProfile) {
+        await refreshProfile();
+      }
+    } catch (err) {
+      console.error('Failed to set campus anchor:', err);
+      throw err;
+    }
+  };
+
+  // Handler: Update student profile
+  const handleUpdateProfile = async (updates) => {
+    if (!user?.id) return;
+    const res = await updateStudentProfile(user.id, updates);
+    if (res.error) {
+      throw new Error(res.error);
+    }
+    if (refreshProfile) {
+      await refreshProfile();
+    }
+  };
+
+  // Handler: Remove favourite
+  const handleRemoveFavourite = async (favouriteId) => {
+    if (!user?.id) return;
+    const res = await removeStudentSavedPG(user.id, favouriteId);
+    if (res.success) {
+      setFavourites(prev => prev.filter(f => f.id !== favouriteId));
+    }
+  };
 
   return (
-    <div className="dashboard-container container">
-      {/* Header Banner */}
-      <div className="dashboard-header-card">
-        <div className="dashboard-role-badge">
-          <IconGraduationCap className="w-4 h-4 text-indigo" />
-          <span>Student Account</span>
-        </div>
+    <div className="student-dashboard-page">
+      <div className="container student-dashboard-container">
+        {/* 1. Premium Welcome Header */}
+        <StudentHeader 
+          profile={profile}
+          user={user}
+          college={currentCollege}
+          savedCount={favourites.length}
+          enquiriesCount={enquiries.length}
+          onSelectTab={setActiveTab}
+        />
 
-        <div className="dashboard-title-row">
-          <div>
-            <h1 className="dashboard-title">Student Dashboard</h1>
-            <p className="dashboard-welcome">Welcome to CampusNest, <strong>{displayName}</strong>!</p>
-          </div>
-          <button 
-            type="button" 
-            className="btn-dash-logout"
-            onClick={signOut}
-            title="Log out of your account"
-          >
-            <IconLogOut className="w-4 h-4" />
-            <span>Log out</span>
-          </button>
-        </div>
+        {/* 2. Sleek Tab Navigation */}
+        <StudentNavigation 
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          savedCount={favourites.length}
+          enquiriesCount={enquiries.length}
+          onSignOut={signOut}
+        />
 
-        <div className="dashboard-meta-chips">
-          <span className="meta-chip">📧 {displayEmail}</span>
-          <span className="meta-chip">📍 Primary Hub: Pune / Maharashtra</span>
-          <span className="meta-chip status-active">✓ Account Verified</span>
-        </div>
-      </div>
+        {/* 3. Main Dashboard Viewport */}
+        <main className="student-viewport-stage">
+          <AnimatePresence mode="wait">
+            {activeTab === 'overview' && (
+              <motion.div
+                key="tab-overview"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StudentOverview 
+                  user={user}
+                  profile={profile}
+                  college={currentCollege}
+                  favourites={favourites}
+                  enquiries={enquiries}
+                  dataLoading={dataLoading}
+                  onSelectTab={setActiveTab}
+                  onBrowsePGs={onBrowsePGs}
+                />
+              </motion.div>
+            )}
 
-      {/* Feature Cards Grid */}
-      <div className="dash-grid">
-        {/* Card 1: Campus Search Anchor */}
-        <div className="dash-card">
-          <div className="dash-card-icon bg-indigo-subtle">
-            <IconMapPin className="w-6 h-6 text-indigo" />
-          </div>
-          <h3>Find PGs Near Your College</h3>
-          <p>Explore verified student accommodations calculated by walking minutes from your university gates.</p>
-          <button 
-            type="button" 
-            className="dash-action-btn primary"
-            onClick={onBrowsePGs}
-          >
-            <span>Explore Campus PGs</span>
-            <IconArrowRight className="w-4 h-4" />
-          </button>
-        </div>
+            {activeTab === 'discover' && (
+              <motion.div
+                key="tab-discover"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StudentDiscovery 
+                  currentCollege={currentCollege}
+                  onAnchorCollege={handleAnchorCollege}
+                  onBrowsePGs={onBrowsePGs}
+                />
+              </motion.div>
+            )}
 
-        {/* Card 2: Saved / Favourites */}
-        <div className="dash-card">
-          <div className="dash-card-icon bg-pink-subtle">
-            <IconHeart className="w-6 h-6 text-pink" />
-          </div>
-          <h3>Saved PGs & Wishlist</h3>
-          <p>Compare room rent, amenities, and food mess options side-by-side before your admission date.</p>
-          <div className="dash-status-pill">
-            <span>0 PGs currently saved</span>
-          </div>
-        </div>
+            {activeTab === 'saved' && (
+              <motion.div
+                key="tab-saved"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StudentSaved 
+                  favourites={favourites}
+                  onRemoveFavourite={handleRemoveFavourite}
+                  onNavigateDiscover={() => setActiveTab('discover')}
+                  onBrowsePGs={onBrowsePGs}
+                />
+              </motion.div>
+            )}
 
-        {/* Card 3: Inquiries & Visits */}
-        <div className="dash-card">
-          <div className="dash-card-icon bg-emerald-subtle">
-            <IconShield className="w-6 h-6 text-emerald" />
-          </div>
-          <h3>Campus Visits & Enquiries</h3>
-          <p>Track your scheduled PG tours and direct communications with verified property hosts.</p>
-          <div className="dash-status-pill">
-            <span>No pending visit requests</span>
-          </div>
-        </div>
-      </div>
+            {activeTab === 'enquiries' && (
+              <motion.div
+                key="tab-enquiries"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StudentEnquiries 
+                  enquiries={enquiries}
+                  onNavigateDiscover={() => setActiveTab('discover')}
+                  onBrowsePGs={onBrowsePGs}
+                />
+              </motion.div>
+            )}
 
-      {/* Notice Banner */}
-      <div className="dash-phase-note">
-        <strong>Phase 2 Authentication Active:</strong> Student session is securely authenticated via Supabase. 
-        Full enquiry tracking, real-time messaging, and interactive booking will unlock in subsequent phases.
+            {activeTab === 'profile' && (
+              <motion.div
+                key="tab-profile"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+              >
+                <StudentProfile 
+                  key={profile?.updated_at || profile?.id || 'student-profile'}
+                  user={user}
+                  profile={profile}
+                  college={currentCollege}
+                  onUpdateProfile={handleUpdateProfile}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
       </div>
     </div>
   );

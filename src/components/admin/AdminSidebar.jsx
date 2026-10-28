@@ -11,7 +11,8 @@ import {
   IconCheck,
   IconLogOut,
   IconX,
-  IconExternalLink
+  IconExternalLink,
+  IconUsers,
 } from '../Icons';
 import './AdminShell.css';
 
@@ -72,6 +73,11 @@ export default function AdminSidebar({
       label: 'Activity & Audit',
       icon: IconActivity,
     },
+    ...(profile?.can_manage_admins ? [{
+      id: 'admins',
+      label: 'Admin Access',
+      icon: IconUsers,
+    }] : []),
     {
       id: 'settings',
       label: 'Settings',
@@ -171,7 +177,7 @@ export default function AdminSidebar({
             <div className="identity-info-stack">
               <div className="identity-name-row">
                 <span className="admin-name" title={adminName}>{adminName}</span>
-                <span className="role-tag-admin">{personalization?.isEasterEgg ? 'VIP ADMIN' : 'ADMIN'}</span>
+                <span className="role-tag-admin">ADMIN</span>
               </div>
               <span className="admin-email" title={adminEmail}>{adminEmail}</span>
               <div className="identity-verified-pill">

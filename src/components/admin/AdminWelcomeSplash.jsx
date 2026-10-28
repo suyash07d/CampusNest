@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconShield, 
   IconCheck, 
-  IconArrowRight, 
-  IconSparkles 
+  IconArrowRight
 } from '../Icons';
 import './AdminWelcomeSplash.css';
 
@@ -55,8 +54,6 @@ export default function AdminWelcomeSplash({ personalization, onDismiss }) {
     };
   }, [handleClose]);
 
-  const isEasterEgg = personalization?.isEasterEgg;
-
   return (
     <AnimatePresence>
       {!exiting && (
@@ -104,7 +101,7 @@ export default function AdminWelcomeSplash({ personalization, onDismiss }) {
 
           {/* Centered Glassmorphic Greeting Card */}
           <motion.div
-            className={`admin-welcome-card ${isEasterEgg ? 'easter-egg-card' : ''}`}
+            className="admin-welcome-card"
             initial={{ opacity: 0, y: 28, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.97 }}
@@ -118,17 +115,10 @@ export default function AdminWelcomeSplash({ personalization, onDismiss }) {
                 <span>CAMPUSNEST CONTROL CENTER</span>
               </div>
 
-              {isEasterEgg ? (
-                <div className="welcome-easter-egg-tag">
-                  <IconSparkles className="w-3.5 h-3.5 text-amber" />
-                  <span>VIP EASTER EGG</span>
-                </div>
-              ) : (
-                <div className="welcome-status-tag">
-                  <div className="pulse-dot-green" />
-                  <span>SECURE SESSION</span>
-                </div>
-              )}
+              <div className="welcome-status-tag">
+                <div className="pulse-dot-green" />
+                <span>SECURE SESSION</span>
+              </div>
             </div>
 
             {/* Playful Animated Waving Hand */}

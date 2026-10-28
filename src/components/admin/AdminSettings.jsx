@@ -39,7 +39,7 @@ export default function AdminSettings({ profile, personalization, onSignOut, onG
               <IconShield className="w-5 h-5 text-indigo" />
               <h3>Administrative Identity</h3>
             </div>
-            <span className="role-tag-admin">{personalization?.isEasterEgg ? 'VIP ADMIN' : 'VERIFIED ADMIN'}</span>
+            <span className="role-tag-admin">VERIFIED ADMIN</span>
           </div>
 
           <div className="settings-card-body">
@@ -56,12 +56,6 @@ export default function AdminSettings({ profile, personalization, onSignOut, onG
                 <span className="kv-key">Assigned Title</span>
                 <span className="kv-val">{adminBadge}</span>
               </div>
-              {personalization?.isEasterEgg && (
-                <div className="kv-row">
-                  <span className="kv-key">VIP Easter Egg</span>
-                  <span className="kv-val text-amber font-semibold">Active: &quot;{personalization.welcomeGreeting}&quot;</span>
-                </div>
-              )}
               <div className="kv-row">
                 <span className="kv-key">System Role</span>
                 <span className="kv-val">

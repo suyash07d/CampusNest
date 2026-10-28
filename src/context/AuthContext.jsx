@@ -9,6 +9,11 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const hashParams = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
+    return hashParams.get('type') === 'recovery' || hashParams.get('type') === 'invite';
+  });
 
   // Initialize authError from URL params (e.g. expired otp or invalid link)
   const [authError, setAuthError] = useState(() => {
@@ -149,6 +154,10 @@ export function AuthProvider({ children }) {
     // Listen for auth state changes (login, logout, token refresh, email confirmation)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
       if (!mounted) return;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      }
 
       setSession(currentSession);
       const currentUser = currentSession?.user || null;
@@ -324,6 +333,20 @@ export function AuthProvider({ children }) {
     setProfile(null);
     setAuthNotice(null);
     setAuthError(null);
+    setIsPasswordRecovery(false);
+  };
+
+  const requestPasswordRecovery = async (email) => {
+    const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/admin` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+    if (error) throw error;
+  };
+
+  const updateRecoveredPassword = async (password) => {
+    const { data, error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+    setIsPasswordRecovery(false);
+    return data;
   };
 
   // Derived role (profile role -> user_metadata role -> default 'student')
@@ -335,6 +358,7 @@ export function AuthProvider({ children }) {
     profile,
     role,
     isAdmin: profile?.role === 'admin',
+    isPasswordRecovery,
     loading,
     isAuthenticated: !!user,
     authError,
@@ -344,6 +368,8 @@ export function AuthProvider({ children }) {
     signUp,
     signIn,
     signInAdmin,
+    requestPasswordRecovery,
+    updateRecoveredPassword,
     signOut,
     refreshProfile: () => user && fetchProfile(user.id, user),
   };

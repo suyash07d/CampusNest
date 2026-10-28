@@ -93,16 +93,6 @@
   cursor: default;
 }
 
-/* Special Easter Egg Glow Variant (for Vishal Bhutekar) */
-.admin-welcome-card.easter-egg-card {
-  border-color: rgba(245, 158, 11, 0.35);
-  box-shadow: 
-    0 25px 60px -15px rgba(0, 0, 0, 0.85),
-    0 0 45px rgba(245, 158, 11, 0.16),
-    0 0 0 1px rgba(245, 158, 11, 0.25),
-    inset 0 1px 1px rgba(251, 191, 36, 0.25);
-}
-
 /* Card Badge Row */
 .welcome-card-badge-row {
   display: flex;
@@ -138,20 +128,6 @@
   color: #6ee7b7;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.25);
-  padding: 0.25rem 0.65rem;
-  border-radius: 9999px;
-}
-
-.welcome-easter-egg-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: #fcd34d;
-  background: rgba(245, 158, 11, 0.16);
-  border: 1px solid rgba(245, 158, 11, 0.35);
   padding: 0.25rem 0.65rem;
   border-radius: 9999px;
 }

@@ -15,6 +15,7 @@ import AdminEnquiries from './AdminEnquiries';
 import AdminReports from './AdminReports';
 import AdminActivityAudit from './AdminActivityAudit';
 import AdminSettings from './AdminSettings';
+import AdminManagement from './AdminManagement';
 import AdminWelcomeSplash from './AdminWelcomeSplash';
 import { getAdminPersonalization } from '../../config/adminPersonalization';
 import { getOverviewMetrics } from '../../lib/adminService';
@@ -106,6 +107,8 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
         return 'Trust & Safety Reports';
       case 'activity':
         return 'Activity & Demand Audit';
+      case 'admins':
+        return 'Admin Access';
       case 'settings':
         return 'Settings & Security';
       default:
@@ -266,6 +269,10 @@ export default function AdminShell({ profile, onSignOut, onGoHome }) {
 
             {activeSection === 'activity' && (
               <AdminActivityAudit />
+            )}
+
+            {activeSection === 'admins' && profile?.can_manage_admins && (
+              <AdminManagement />
             )}
 
             {activeSection === 'settings' && (

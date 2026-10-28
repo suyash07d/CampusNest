@@ -30,6 +30,9 @@ function CampusNestContent() {
     authError, 
     clearAuthError,
     signInAdmin,
+    requestPasswordRecovery,
+    updateRecoveredPassword,
+    isPasswordRecovery,
     signOut
   } = useAuth();
 
@@ -158,6 +161,19 @@ function CampusNestContent() {
       );
     }
 
+    if (isPasswordRecovery) {
+      return (
+        <AdminLogin
+          initialView="reset"
+          onUpdatePassword={updateRecoveredPassword}
+          onCancelPasswordRecovery={signOut}
+          onLogin={signInAdmin}
+          onGoHome={() => navigateTo('/')}
+          securityNotice={adminSecurityNotice}
+        />
+      );
+    }
+
     if (isAuthenticated && isAdmin) {
       return (
         <AdminShell 
@@ -174,6 +190,9 @@ function CampusNestContent() {
     return (
       <AdminLogin 
         onLogin={signInAdmin}
+        onRequestReset={requestPasswordRecovery}
+        onUpdatePassword={updateRecoveredPassword}
+        onCancelPasswordRecovery={signOut}
         onGoHome={() => navigateTo('/')}
         securityNotice={adminSecurityNotice}
       />
