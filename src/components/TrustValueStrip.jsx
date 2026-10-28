@@ -44,11 +44,11 @@ export default function TrustValueStrip() {
   };
 
   return (
-    <section className="trust-strip-section" aria-label="Why CampusNest for Students">
+    <section className="trust-strip-section" aria-label="Why AplaStay for Students">
       <div className="container">
         {/* Subtle Section Header */}
         <div className="trust-strip-header">
-          <span className="trust-label-badge">WHY CAMPUSNEST</span>
+          <span className="trust-label-badge">WHY APLASTAY</span>
           <h2 className="trust-headline">Built from the ground up for students moving to a new city</h2>
           <p className="trust-sub">Traditional rental portals focus on family apartments and commission brokers. We focus exclusively on student academic life.</p>
         </div>

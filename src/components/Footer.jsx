@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import AplaStayLogo from './AplaStayLogo';
+import './AplaStayLogo.css';
 import { IconGraduationCap, IconShield, IconMail, IconSparkles } from './Icons';
 import './Footer.css';
 
@@ -11,21 +13,17 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
   };
 
   return (
-    <footer className="site-footer" aria-label="CampusNest Footer">
+    <footer className="site-footer" aria-label="AplaStay Footer">
       <div className="container">
         {/* Navigation & Hubs Grid */}
         <div className="footer-top-grid">
           {/* Brand Info */}
           <div className="footer-brand-col">
             <div className="footer-logo">
-              <div className="footer-brand-icon">
-                <IconGraduationCap className="w-5 h-5 text-white" />
-              </div>
-              <span className="footer-brand-name">Campus<span>Nest</span></span>
+              <AplaStayLogo size={36} theme="dark" showTagline={true} />
             </div>
             <p className="footer-mission">
-              The student-first accommodation discovery platform. 
-              Helping students find verified, walkable PGs near their university gates across India.
+              AplaStay: Find your place. Belong to more. The student-first accommodation discovery network for Pune campuses with zero brokerage.
             </p>
             <div className="footer-safe-badge">
               <IconShield className="w-4 h-4 text-emerald" />
@@ -85,7 +83,7 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
         {/* Disclaimer Strip */}
         <div className="footer-disclaimer-strip">
           <p>
-            <strong>Note & Disclaimer:</strong> CampusNest is a specialized student housing discovery platform. 
+            <strong>Note & Disclaimer:</strong> AplaStay is a specialized student housing discovery platform. 
             All accommodation profiles, distances, and amenities shown on this preview interface are representative 
             demonstration models designed to showcase our upcoming verified marketplace for the 2026 academic admissions intake.
           </p>
@@ -131,7 +129,7 @@ export default function Footer({ onOpenOwnerModal, onOpenAuth, onOpenAdmin }) {
         {/* Bottom Bar */}
         <div className="footer-bottom-bar">
           <p className="copyright-text">
-            © {new Date().getFullYear()} CampusNest Technologies Inc. Built for students moving to a new city.
+            © {new Date().getFullYear()} AplaStay Technologies. Built for students moving to a new city.
           </p>
           <div className="footer-social-meta">
             <span>Privacy Policy</span>

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
+import AplaStayLogo from './AplaStayLogo';
+import './AplaStayLogo.css';
 import { 
   IconMapPin, 
   IconGraduationCap, 
@@ -69,14 +71,7 @@ export default function Navbar({
             if (onNavigateHome) onNavigateHome();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}>
-            <div className="brand-icon-wrapper">
-              <IconGraduationCap className="brand-cap-icon" />
-              <div className="brand-dot-pulse" />
-            </div>
-            <div className="brand-text-group">
-              <span className="brand-name">Campus<span className="brand-highlight">Nest</span></span>
-              <span className="brand-subtext">Near Your College</span>
-            </div>
+            <AplaStayLogo size={36} theme="dark" />
           </a>
 
           {/* Desktop Navigation */}
@@ -199,7 +194,7 @@ export default function Navbar({
                   type="button" 
                   className="btn-logout-nav"
                   onClick={signOut}
-                  title="Sign out of CampusNest"
+                  title="Sign out of AplaStay"
                 >
                   <IconLogOut className="w-3.5 h-3.5" />
                   <span>Log out</span>
@@ -241,10 +236,7 @@ export default function Navbar({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="mobile-drawer-header">
-                <div className="brand-text-group">
-                  <span className="brand-name">Campus<span className="brand-highlight">Nest</span></span>
-                  <span className="brand-subtext">Verified Student Housing</span>
-                </div>
+                <AplaStayLogo size={32} theme="light" />
                 <button 
                   type="button" 
                   className="mobile-close-btn"

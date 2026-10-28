@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
     const searchParams = new URLSearchParams(window.location.search || '');
     const type = hashParams.get('type');
     if (type === 'signup' || type === 'email_change' || searchParams.has('code')) {
-      return '🎉 Email confirmed successfully! Welcome to your CampusNest dashboard.';
+      return '🎉 Email confirmed successfully! Welcome to your AplaStay dashboard.';
     }
     return null;
   });
@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
         const meta = fallbackUser.user_metadata || {};
         // SECURITY: Role strictly locked to 'student' or 'owner'. Never 'admin'.
         const safeRole = meta.role === 'owner' ? 'owner' : 'student';
-        const cleanFullName = (meta.full_name || '').trim() || fallbackUser.email?.split('@')[0] || 'CampusNest User';
+        const cleanFullName = (meta.full_name || '').trim() || fallbackUser.email?.split('@')[0] || 'AplaStay User';
 
         const newProfile = {
           id: userId,
@@ -175,7 +175,7 @@ export function AuthProvider({ children }) {
           // If coming from email confirmation, clean hash from URL
           if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
             window.history.replaceState(null, '', window.location.pathname);
-            setAuthNotice('🎉 Email confirmed successfully! Welcome to your CampusNest dashboard.');
+            setAuthNotice('🎉 Email confirmed successfully! Welcome to your AplaStay dashboard.');
           }
         }
       } else {

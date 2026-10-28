@@ -139,7 +139,7 @@ export default function AdminManagement({ session }) {
               </div>
               <div className="invite-link-actions">
                 <a
-                  href={`https://wa.me/?text=${encodeURIComponent(`Hello! Here is your CampusNest Administrator setup link: ${inviteLink}\nClick this link to set your password and access the admin dashboard.`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`Hello! Here is your AplaStay Administrator setup link: ${inviteLink}\nClick this link to set your password and access the admin dashboard.`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-share-whatsapp"
@@ -196,7 +196,7 @@ export default function AdminManagement({ session }) {
                 <li key={admin.id} className="admin-directory-item">
                   <div className="admin-directory-avatar">{(admin.full_name || admin.email || 'A').trim().charAt(0).toUpperCase()}</div>
                   <div className="admin-directory-identity">
-                    <strong>{admin.full_name || 'CampusNest administrator'}</strong>
+                    <strong>{admin.full_name || 'AplaStay administrator'}</strong>
                     <span>{admin.email}</span>
                   </div>
                   <span className={`admin-directory-status ${admin.status === 'Primary Administrator' ? 'is-primary-admin' : admin.status === 'Active' ? 'is-active' : 'is-pending'}`}>

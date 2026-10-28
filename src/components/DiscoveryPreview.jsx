@@ -96,7 +96,7 @@ export default function DiscoveryPreview({ searchParams, onSelectCollege, onOpen
             <IconShield className="disclaimer-icon" />
           </div>
           <div className="disclaimer-text">
-            <strong>CampusNest Pune Verification Mission</strong>: We are currently conducting on-the-ground 
+            <strong>AplaStay Pune Verification Mission</strong>: We are currently conducting on-the-ground 
             audits of student accommodations, PGs, and mess providers within walking radius of 45+ official SPPU 
             and DTE Maharashtra campuses. Zero fabricated distances. Zero broker surprise charges.
           </div>
@@ -119,7 +119,7 @@ export default function DiscoveryPreview({ searchParams, onSelectCollege, onOpen
               PG discovery for this college is coming next
             </h2>
             <p className="discovery-subtitle">
-              CampusNest is actively indexing gate-measured student housing for verified Pune institutions.
+              AplaStay is actively indexing gate-measured student housing for verified Pune institutions.
               Select any college anchor below to check audit status or register for early access.
             </p>
           </div>

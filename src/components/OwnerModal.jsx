@@ -58,7 +58,7 @@ export default function OwnerModal({ onClose }) {
               <div className="owner-icon-tag">
                 <IconBuilding className="w-5 h-5 text-indigo" />
               </div>
-              <h2 id="owner-modal-title" className="owner-modal-title">Partner with CampusNest</h2>
+              <h2 id="owner-modal-title" className="owner-modal-title">Partner with AplaStay</h2>
               <p className="owner-modal-desc">
                 List your student PG or hostel property and get discovered by students admitted to nearby colleges.
               </p>
@@ -159,7 +159,7 @@ export default function OwnerModal({ onClose }) {
             </div>
             <h3>Listing Application Received!</h3>
             <p>
-              Thank you for partnering with CampusNest. Our regional property onboarding 
+              Thank you for partnering with AplaStay. Our regional property onboarding 
               team for <strong>{formData.city.toUpperCase()}</strong> will contact you via WhatsApp on{' '}
               <strong>{formData.phone || '+91-XXXXX'}</strong> to conduct physical room verification and photo cataloging.
             </p>

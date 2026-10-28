@@ -270,9 +270,22 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
 
   return (
     <section id="hero-top" className="hero-section">
-      {/* Ambient background decoration */}
-      <div className="hero-ambient-glow glow-top-left" aria-hidden="true" />
-      <div className="hero-ambient-glow glow-bottom-right" aria-hidden="true" />
+      {/* Dynamic Animated Aurora Atmosphere */}
+      <div className="hero-aurora-glow aurora-indigo" aria-hidden="true" />
+      <div className="hero-aurora-glow aurora-purple" aria-hidden="true" />
+      <div className="hero-aurora-glow aurora-cyan" aria-hidden="true" />
+      <div className="hero-aurora-glow aurora-emerald" aria-hidden="true" />
+      <div className="hero-cosmic-beam" aria-hidden="true" />
+      <div className="hero-stars-particles" aria-hidden="true">
+        <span className="cosmic-star star-1" />
+        <span className="cosmic-star star-2" />
+        <span className="cosmic-star star-3" />
+        <span className="cosmic-star star-4" />
+        <span className="cosmic-star star-5" />
+        <span className="cosmic-star star-6" />
+        <span className="cosmic-star star-7" />
+        <span className="cosmic-star star-8" />
+      </div>
       <div className="hero-grid-pattern" aria-hidden="true" />
 
       <div className="container hero-container">
@@ -293,14 +306,13 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
 
           {/* Main Headline */}
           <motion.h1 variants={fadeUp} className="hero-title">
-            Find verified student housing near your college in{' '}
+            Your Next Home, Near Your College in{' '}
             <span className="hero-title-accent">Pune.</span>
           </motion.h1>
 
           {/* Supporting Text */}
           <motion.p variants={fadeUp} className="hero-subtitle">
-            Zero fake listings. Zero broker fee surprises. We are mapping gate-to-door walking distances,
-            verified rooms, and home-cooked mess facilities exclusively around Pune&apos;s premier higher education institutes.
+            Discover verified PGs and accommodations built for student life. Zero fake listings, zero broker fee surprises, and honest gate-to-door walking distances around Pune&apos;s premier campuses.
           </motion.p>
 
           {/* MAIN PUNE DISCOVERY COMMAND PANEL */}
@@ -732,7 +744,7 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
                         PG discovery for this college is coming next
                       </h2>
                       <p className="transition-lead">
-                        CampusNest field auditors are currently verifying student accommodations, hostels, and 
+                        AplaStay field auditors are currently verifying student accommodations, hostels, and 
                         home-cooked mess providers within walking radius of <strong>{selectedCollege.shortName}&apos;s</strong> gates.
                       </p>
                     </div>

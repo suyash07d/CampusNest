@@ -75,7 +75,7 @@ export default function AdminLogin({ onLogin, onGoHome, securityNotice, initialV
           </button>
           <div className="admin-live-pulse-badge">
             <span className="live-dot" />
-            <span>CampusNest Admin</span>
+            <span>AplaStay Admin</span>
           </div>
         </div>
       </header>
@@ -147,7 +147,7 @@ export default function AdminLogin({ onLogin, onGoHome, securityNotice, initialV
                       id="admin-email"
                       type="email"
                       className="admin-input"
-                      placeholder="admin@campusnest.in"
+                      placeholder="admin@aplastay.in"
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); setErrorMessage(''); }}
                       autoComplete="username"

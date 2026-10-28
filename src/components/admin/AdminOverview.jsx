@@ -204,14 +204,14 @@ export default function AdminOverview({ onNavigate, onReviewPG, profile, persona
           <div className="welcome-hero-title-row">
             <span className="welcome-hero-emoji">👋</span>
             <h3 className="welcome-hero-heading">
-              {personalization?.welcomeGreeting || 'Welcome to CampusNest!'}
+              {personalization?.welcomeGreeting || 'Welcome to AplaStay!'}
             </h3>
             {personalization?.badge && (
               <span className="welcome-hero-badge">{personalization.badge}</span>
             )}
           </div>
           <p className="welcome-hero-subtext">
-            {personalization?.subGreeting || 'CampusNest Control Center is ready.'}
+            {personalization?.subGreeting || 'AplaStay Control Center is ready.'}
             {' '}Active session for <strong className="text-white">{personalization?.displayName || profile?.full_name || 'Admin'}</strong> ({profile?.email || personalization?.email}). Database RLS actively enforced.
           </p>
         </div>

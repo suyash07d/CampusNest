@@ -112,7 +112,7 @@ export default function AdminWelcomeSplash({ personalization, onDismiss }) {
             <div className="welcome-card-badge-row">
               <div className="welcome-brand-chip">
                 <IconShield className="w-4 h-4 text-indigo" />
-                <span>CAMPUSNEST CONTROL CENTER</span>
+                <span>APLASTAY CONTROL CENTER</span>
               </div>
 
               <div className="welcome-status-tag">
@@ -143,12 +143,12 @@ export default function AdminWelcomeSplash({ personalization, onDismiss }) {
 
             {/* Personalized Primary Greeting */}
             <h1 className="welcome-greeting-title">
-              {personalization?.welcomeGreeting || 'Welcome to CampusNest!'}
+              {personalization?.welcomeGreeting || 'Welcome to AplaStay!'}
             </h1>
 
             {/* Sub-Greeting */}
             <p className="welcome-subgreeting-text">
-              {personalization?.subGreeting || 'CampusNest Control Center is ready.'}
+              {personalization?.subGreeting || 'AplaStay Control Center is ready.'}
             </p>
 
             {/* Admin Verification Pill */}

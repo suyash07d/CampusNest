@@ -1,0 +1,63 @@
+/* ==========================================================================
+   AplaStay Brand Logo & Typography Styles
+   Matches the official brand guidelines: Poppins, gradient wordmark, and tagline
+   ========================================================================== */
+
+.aplastay-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  user-select: none;
+}
+
+.aplastay-brand-logo.vertical {
+  flex-direction: column;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.aplastay-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.brand-wordmark {
+  display: flex;
+  align-items: baseline;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.brand-word-apla.text-white {
+  color: #FFFFFF;
+}
+
+.brand-word-apla.text-slate {
+  color: #0F172A;
+}
+
+.brand-word-stay {
+  background: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  margin-left: 1px;
+}
+
+.brand-tagline {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #94A3B8;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+}
+
+.aplastay-brand-logo.vertical .brand-tagline {
+  margin-top: 0.35rem;
+}

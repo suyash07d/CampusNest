@@ -26,7 +26,7 @@ export default function OwnerDashboard({ onGoToHome }) {
         <div className="dashboard-title-row">
           <div>
             <h1 className="dashboard-title">Owner Dashboard</h1>
-            <p className="dashboard-welcome">Welcome to CampusNest Owner Portal, <strong>{displayName}</strong>!</p>
+            <p className="dashboard-welcome">Welcome to AplaStay Owner Portal, <strong>{displayName}</strong>!</p>
           </div>
           <button 
             type="button" 
@@ -78,13 +78,13 @@ export default function OwnerDashboard({ onGoToHome }) {
             <IconShield className="w-6 h-6 text-emerald" />
           </div>
           <h3>Campus Verification Status</h3>
-          <p>Gate walking distances are verified by CampusNest to ensure honest discovery for students.</p>
+          <p>Gate walking distances are verified by AplaStay to ensure honest discovery for students.</p>
           <button 
             type="button" 
             className="dash-action-btn secondary"
             onClick={onGoToHome}
           >
-            <span>View CampusNest Homepage</span>
+            <span>View AplaStay Homepage</span>
             <IconArrowRight className="w-4 h-4" />
           </button>
         </div>

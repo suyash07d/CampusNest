@@ -15,6 +15,8 @@ import {
   IconUsers,
   IconUser,
 } from '../Icons';
+import AplaStayLogo from '../AplaStayLogo';
+import '../AplaStayLogo.css';
 import './AdminShell.css';
 
 export default function AdminSidebar({
@@ -109,13 +111,8 @@ export default function AdminSidebar({
         {/* Brand header */}
         <div className="sidebar-brand-block">
           <div className="sidebar-brand-logo">
-            <div className="brand-emblem-bubble">
-              <IconShield className="w-5 h-5 text-indigo" />
-            </div>
-            <div className="brand-text-stack">
-              <span className="brand-title-main">Campus<span className="brand-accent">Nest</span></span>
-              <span className="brand-sub-badge">CONTROL CENTER</span>
-            </div>
+            <AplaStayLogo size={32} theme="dark" showTagline={false} />
+            <span className="brand-sub-badge">CONTROL</span>
           </div>
           <button 
             type="button" 
@@ -133,7 +130,7 @@ export default function AdminSidebar({
             type="button" 
             className="btn-switch-portal"
             onClick={onGoHome}
-            title="Go to CampusNest student portal"
+            title="Go to AplaStay student portal"
           >
             <span>Public Student Portal</span>
             <IconExternalLink className="w-3.5 h-3.5" />
@@ -210,7 +207,7 @@ export default function AdminSidebar({
             type="button"
             className="btn-sidebar-logout"
             onClick={onSignOut}
-            title="Sign out of CampusNest Control Center"
+            title="Sign out of AplaStay Control Center"
           >
             <IconLogOut className="w-4 h-4" />
             <span>Sign Out</span>

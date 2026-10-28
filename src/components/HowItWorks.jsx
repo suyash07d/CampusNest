@@ -29,14 +29,14 @@ export default function HowItWorks({ onGetStarted }) {
   };
 
   return (
-    <section id="how-it-works" className="how-it-works-section" aria-label="How CampusNest Works">
+    <section id="how-it-works" className="how-it-works-section" aria-label="How AplaStay Works">
       <div className="container">
         {/* Section Header */}
         <div className="how-header text-center">
           <div className="how-badge">
             <span className="how-badge-text">THREE SIMPLE STEPS</span>
           </div>
-          <h2 className="how-headline">How CampusNest Works for Students</h2>
+          <h2 className="how-headline">How AplaStay Works for Students</h2>
           <p className="how-subtext">
             Moving to a new city for your degree is stressful enough. 
             Finding the right room near your lecture halls shouldn’t be a gamble.

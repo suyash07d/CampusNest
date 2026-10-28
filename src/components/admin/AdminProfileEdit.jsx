@@ -33,7 +33,7 @@ export default function AdminProfileEdit({ profile, session, onProfileUpdated, o
     profile?.can_manage_admins ? 'Primary Administrator' : 'System Administrator'
   );
   const [bio, setBio] = useState(
-    profile?.bio || 'CampusNest Platform Operations & Student Housing Administration.'
+    profile?.bio || 'AplaStay Platform Operations & Student Housing Administration.'
   );
 
   const [isSaving, setIsSaving] = useState(false);

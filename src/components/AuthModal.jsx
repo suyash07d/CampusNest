@@ -177,14 +177,14 @@ export default function AuthModal({ onClose, onAuthSuccess, initialMode = 'login
           <div className="auth-header">
             <div className="auth-brand-badge">
               <IconGraduationCap className="w-4 h-4 text-indigo" />
-              <span>CampusNest Auth</span>
+              <span>AplaStay Auth</span>
             </div>
             <h2 id="auth-modal-title" className="auth-title">
-              {mode === 'login' ? 'Welcome back' : 'Create your CampusNest account'}
+              {mode === 'login' ? 'Welcome back' : 'Create your AplaStay account'}
             </h2>
             <p className="auth-sub">
               {mode === 'login'
-                ? 'Sign in to continue your CampusNest journey.'
+                ? 'Sign in to continue your AplaStay journey.'
                 : 'Join verified students and hosts finding and listing accommodations.'}
             </p>
           </div>
@@ -220,7 +220,7 @@ export default function AuthModal({ onClose, onAuthSuccess, initialMode = 'login
               <h3>Confirm Your Email</h3>
               <p>
                 A confirmation link has been sent to <strong>{email}</strong>. 
-                Please click the link in your email to activate your CampusNest account, then return to sign in.
+                Please click the link in your email to activate your AplaStay account, then return to sign in.
               </p>
               <button 
                 type="button" 
@@ -447,7 +447,7 @@ export default function AuthModal({ onClose, onAuthSuccess, initialMode = 'login
           )}
 
           <div className="auth-footer-terms">
-            <span>By proceeding, you agree to CampusNest&apos;s Terms of Service and Student Safety Guidelines.</span>
+            <span>By proceeding, you agree to AplaStay&apos;s Terms of Service and Student Safety Guidelines.</span>
           </div>
         </div>
       </motion.div>
