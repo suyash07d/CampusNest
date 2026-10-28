@@ -52,6 +52,9 @@ export function AuthProvider({ children }) {
       return null;
     }
 
+    // Never keep one account's role while resolving a different account.
+    setProfile((currentProfile) => currentProfile?.id === userId ? currentProfile : null);
+
     try {
       // 1. Query existing row in public.profiles
       const { data, error } = await supabase
@@ -110,6 +113,7 @@ export function AuthProvider({ children }) {
       return null;
     } catch (err) {
       console.error('Error in fetchProfile:', err);
+      setProfile((currentProfile) => currentProfile?.id === userId ? currentProfile : null);
       return null;
     }
   }, []);
