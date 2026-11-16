@@ -11,7 +11,10 @@ import {
   IconSparkles, 
   IconCamera, 
   IconX,
-  IconInfo
+  IconInfo,
+  IconWhatsApp,
+  IconPhone,
+  IconTrash
 } from './Icons';
 import './OwnerDashboard.css';
 
@@ -96,7 +99,61 @@ export default function OwnerDashboard({ onGoToHome }) {
 
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
   const [newPhotoTag, setNewPhotoTag] = useState('Bedroom View');
-  const [leads, setLeads] = useState(INITIAL_LEADS);
+  const [leads, setLeads] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('aplastay_owner_leads');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return INITIAL_LEADS;
+  });
+
+  // Listen for real-time inquiries sent from student PG modal
+  useEffect(() => {
+    const handleInquiryEvent = (e) => {
+      const newInquiry = e.detail;
+      if (newInquiry) {
+        setLeads(prev => {
+          const exists = prev.some(l => l.id === newInquiry.id);
+          if (exists) return prev;
+          const updated = [newInquiry, ...prev];
+          localStorage.setItem('aplastay_owner_leads', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    };
+    window.addEventListener('aplastay:new_inquiry', handleInquiryEvent);
+    return () => window.removeEventListener('aplastay:new_inquiry', handleInquiryEvent);
+  }, []);
+
+  const updateLeadStatus = (leadId, newStatus) => {
+    setLeads(prev => {
+      const updated = prev.map(lead => {
+        if (lead.id === leadId) {
+          return { ...lead, status: newStatus };
+        }
+        return lead;
+      });
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('aplastay_owner_leads', JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
+
+  const deleteLead = (leadId) => {
+    setLeads(prev => {
+      const updated = prev.filter(l => l.id !== leadId);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('aplastay_owner_leads', JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
 
   // Save changes to localStorage & trigger notice
@@ -179,9 +236,6 @@ export default function OwnerDashboard({ onGoToHome }) {
     }));
   };
 
-  const updateLeadStatus = (leadId, newStatus) => {
-    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
-  };
 
   // Compute total capacity and available vacancies
   const totalCapacity = Object.values(propertyData.roomTiers).reduce((sum, t) => sum + (t.enabled ? Number(t.capacity) : 0), 0);
@@ -876,46 +930,83 @@ export default function OwnerDashboard({ onGoToHome }) {
             </div>
 
             <div className="leads-list-table">
-              {leads.map(lead => (
-                <div key={lead.id} className="lead-row-card">
-                  <div className="lead-student-info">
-                    <span className="lead-name">{lead.studentName}</span>
-                    <span className="lead-college">🎓 {lead.college}</span>
-                    <span className="lead-sharing">🛏️ Requested: <strong>{lead.sharing}</strong></span>
-                  </div>
+              {leads.map(lead => {
+                const cleanNum = (lead.phone || '').replace(/\D/g, '');
+                const waLink = `https://wa.me/${cleanNum}?text=${encodeURIComponent(`Hi ${lead.studentName}! Thank you for your inquiry about ${lead.sharing} at our PG via AplaStay. We would love to welcome you for a visit!`)}`;
+                
+                return (
+                  <div key={lead.id} className="lead-row-card">
+                    <div className="lead-student-info">
+                      <div className="lead-name-row">
+                        <span className="lead-name">{lead.studentName}</span>
+                        {lead.refId && <span className="lead-ref-pill">Ref: {lead.refId}</span>}
+                        {lead.isNew && <span className="lead-new-badge">NEW</span>}
+                      </div>
+                      <span className="lead-college">🎓 {lead.college}</span>
+                      <span className="lead-sharing">🛏️ Requested: <strong>{lead.sharing}</strong> {lead.rent ? `(₹${lead.rent}/mo)` : ''}</span>
+                      {lead.slot && <span className="lead-slot-info">🕒 Preferred Slot: {lead.slot}</span>}
+                    </div>
 
-                  <div className="lead-date-box">
-                    <span className="lead-date">Enquired on {lead.date}</span>
-                    <span className={`lead-status-pill ${lead.status === 'Confirmed' ? 'pill-confirmed' : 'pill-pending'}`}>
-                      {lead.status}
-                    </span>
-                  </div>
+                    <div className="lead-date-box">
+                      <span className="lead-date">{lead.date}</span>
+                      <span className={`lead-status-pill ${lead.status === 'Confirmed' ? 'pill-confirmed' : 'pill-pending'}`}>
+                        {lead.status}
+                      </span>
+                    </div>
 
-                  <div className="lead-actions-cluster">
-                    <a href={`tel:${lead.phone}`} className="btn-lead-call">
-                      <span>📞 {lead.phone}</span>
-                    </a>
-                    
-                    {lead.status !== 'Confirmed' ? (
+                    <div className="lead-actions-cluster">
+                      <a 
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-lead-whatsapp"
+                        title="Chat with student on WhatsApp"
+                      >
+                        <IconWhatsApp className="w-3.5 h-3.5 text-emerald" />
+                        <span>WhatsApp</span>
+                      </a>
+
+                      <a href={`tel:${(lead.phone || '').replace(/\s+/g, '')}`} className="btn-lead-call" title="Call student">
+                        <IconPhone className="w-3.5 h-3.5" />
+                        <span>{lead.phone}</span>
+                      </a>
+                      
+                      {lead.status !== 'Confirmed' ? (
+                        <button 
+                          type="button" 
+                          className="btn-lead-approve"
+                          onClick={() => updateLeadStatus(lead.id, 'Confirmed')}
+                        >
+                          ✓ Reserve Bed
+                        </button>
+                      ) : (
+                        <button 
+                          type="button" 
+                          className="btn-lead-cancel"
+                          onClick={() => updateLeadStatus(lead.id, 'Pending Review')}
+                        >
+                          Undo
+                        </button>
+                      )}
+
                       <button 
                         type="button" 
-                        className="btn-lead-approve"
-                        onClick={() => updateLeadStatus(lead.id, 'Confirmed')}
+                        className="btn-lead-delete"
+                        onClick={() => deleteLead(lead.id)}
+                        title="Dismiss lead"
                       >
-                        ✓ Reserve Bed
+                        <IconTrash className="w-3.5 h-3.5 text-muted" />
                       </button>
-                    ) : (
-                      <button 
-                        type="button" 
-                        className="btn-lead-cancel"
-                        onClick={() => updateLeadStatus(lead.id, 'Pending Review')}
-                      >
-                        Undo
-                      </button>
-                    )}
+                    </div>
                   </div>
+                );
+              })}
+
+              {leads.length === 0 && (
+                <div className="leads-empty-state">
+                  <p>No student inquiries registered yet. When a student schedules a campus visit, it appears here in real time!</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}

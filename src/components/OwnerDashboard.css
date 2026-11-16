@@ -932,3 +932,92 @@ input:checked + .toggle-slider:before {
     justify-content: center;
   }
 }
+
+
+/* ==========================================================================
+   ENHANCED REAL-TIME LEADS STYLES
+   ========================================================================== */
+.lead-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lead-ref-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-muted);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.lead-new-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #10B981;
+  color: #FFFFFF;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  animation: pulseNew 2s infinite ease-in-out;
+}
+
+@keyframes pulseNew {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.95); }
+}
+
+.lead-slot-info {
+  font-size: 0.78rem;
+  color: var(--primary-600);
+  font-weight: 600;
+}
+
+.btn-lead-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10B981;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.55rem 0.95rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-lead-whatsapp:hover {
+  background: rgba(16, 185, 129, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-lead-delete {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.55rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.btn-lead-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #EF4444;
+}
+
+.leads-empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: var(--bg-subtle);
+  border: 1.5px dashed var(--border-light);
+  border-radius: 16px;
+  color: var(--text-muted);
+}
