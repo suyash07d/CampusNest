@@ -23,11 +23,59 @@ export default function StudentDashboard({ onBrowsePGs }) {
   const { user, profile, refreshProfile, signOut } = useAuth();
   
   const [activeTab, setActiveTab] = useState('overview');
-  const [favourites, setFavourites] = useState([]);
-  const [enquiries, setEnquiries] = useState([]);
+  const [favourites, setFavourites] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('aplastay_saved_pg_objects');
+        if (saved) return JSON.parse(saved);
+      } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
+  const [enquiries, setEnquiries] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('aplastay_my_inquiries');
+        if (saved) return JSON.parse(saved);
+      } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
   const [dataLoading, setDataLoading] = useState(false);
 
-  // Load real student favourites and enquiries from Supabase
+  // Real-time synchronization for inquiries and bookmarks
+  useEffect(() => {
+    const handleNewInquiry = (e) => {
+      const inq = e.detail;
+      if (inq) {
+        setEnquiries(prev => {
+          const exists = prev.some(item => item.id === inq.id);
+          if (exists) return prev;
+          const updated = [inq, ...prev];
+          localStorage.setItem('aplastay_my_inquiries', JSON.stringify(updated));
+          return updated;
+        });
+      }
+    };
+
+    const handleSavedChanged = () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const saved = JSON.parse(localStorage.getItem('aplastay_saved_pg_objects') || '[]');
+          setFavourites(saved);
+        } catch (e) { /* ignore */ }
+      }
+    };
+
+    window.addEventListener('aplastay:new_inquiry', handleNewInquiry);
+    window.addEventListener('aplastay:saved_changed', handleSavedChanged);
+    return () => {
+      window.removeEventListener('aplastay:new_inquiry', handleNewInquiry);
+      window.removeEventListener('aplastay:saved_changed', handleSavedChanged);
+    };
+  }, []);
+
+  // Load real student favourites and enquiries from Supabase if logged in
   useEffect(() => {
     let isMounted = true;
     if (!user?.id) {
@@ -39,8 +87,18 @@ export default function StudentDashboard({ onBrowsePGs }) {
       getStudentEnquiries(user.id),
     ]).then(([favRes, enqRes]) => {
       if (isMounted) {
-        setFavourites(favRes.favourites || []);
-        setEnquiries(enqRes.enquiries || []);
+        if (favRes.favourites && favRes.favourites.length > 0) {
+          setFavourites(favRes.favourites);
+        }
+        if (enqRes.enquiries && enqRes.enquiries.length > 0) {
+          setEnquiries(prev => {
+            // merge remote and local inquiries by id
+            const remote = enqRes.enquiries;
+            const remoteIds = new Set(remote.map(r => r.id));
+            const localOnly = prev.filter(p => !remoteIds.has(p.id));
+            return [...remote, ...localOnly];
+          });
+        }
         setDataLoading(false);
       }
     }).catch(err => {
@@ -102,10 +160,27 @@ export default function StudentDashboard({ onBrowsePGs }) {
 
   // Handler: Remove favourite
   const handleRemoveFavourite = async (favouriteId) => {
-    if (!user?.id) return;
-    const res = await removeStudentSavedPG(user.id, favouriteId);
-    if (res.success) {
-      setFavourites(prev => prev.filter(f => f.id !== favouriteId));
+    // 1. Remove from local state and storage
+    setFavourites(prev => {
+      const updated = prev.filter(f => (f.id !== favouriteId && f.pg?.id !== favouriteId));
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('aplastay_saved_pg_objects', JSON.stringify(updated));
+          const updatedIds = updated.map(f => f.id || f.pg?.id).filter(Boolean);
+          localStorage.setItem('aplastay_saved_pgs', JSON.stringify(updatedIds));
+          window.dispatchEvent(new CustomEvent('aplastay:saved_changed', { detail: updatedIds }));
+        } catch (e) { /* ignore */ }
+      }
+      return updated;
+    });
+
+    // 2. Sync to Supabase if logged in
+    if (user?.id) {
+      try {
+        await removeStudentSavedPG(user.id, favouriteId);
+      } catch (err) {
+        console.warn('Could not sync removal to remote Supabase:', err);
+      }
     }
   };
 

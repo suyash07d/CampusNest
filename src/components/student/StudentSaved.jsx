@@ -90,10 +90,15 @@ export default function StudentSaved({
         <div className="saved-pgs-grid">
           <AnimatePresence mode="popLayout">
             {favourites.map((fav) => {
-              const pg = fav.pg || {};
+              const pg = fav.pg || fav || {};
+              const rentVal = pg.starting_monthly_rent ? `₹${pg.starting_monthly_rent.toLocaleString('en-IN')}/mo` : pg.rent ? `₹${pg.rent}/mo` : '—';
+              const addressVal = pg.address || pg.areas?.name || pg.area || 'Pune';
+              const hasFood = pg.food_available || pg.tags?.some(t => t.toLowerCase().includes('meal')) || pg.amenities?.some(a => a?.name?.toLowerCase().includes('meal'));
+              const savedDateStr = fav.created_at ? new Date(fav.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : 'Saved Recently';
+
               return (
                 <motion.article 
-                  key={fav.id}
+                  key={fav.id || pg.id}
                   className="saved-pg-card"
                   layout
                   initial={{ opacity: 0, scale: 0.98 }}
@@ -103,13 +108,13 @@ export default function StudentSaved({
                 >
                   <div className="saved-card-header">
                     <div className="saved-badge-gender">
-                      {pg.gender_type ? `${pg.gender_type.toUpperCase()} PG` : 'STUDENT PG'}
+                      {pg.gender_type ? `${pg.gender_type.toUpperCase()} PG` : pg.gender ? `${pg.gender.toUpperCase()} PG` : 'STUDENT PG'}
                     </div>
                     {onRemoveFavourite && (
                       <button 
                         type="button" 
                         className="btn-remove-favourite"
-                        onClick={() => onRemoveFavourite(fav.id)}
+                        onClick={() => onRemoveFavourite(fav.id || pg.id)}
                         title="Remove from saved"
                       >
                         <IconX className="w-4 h-4" />
@@ -121,16 +126,16 @@ export default function StudentSaved({
 
                   <p className="saved-pg-address">
                     <IconMapPin className="w-3.5 h-3.5" />
-                    <span>{pg.address || pg.areas?.name || 'Pune'}</span>
+                    <span>{addressVal}</span>
                   </p>
 
                   <div className="saved-pg-details">
                     <div className="detail-chip">
                       <span className="chip-label">Rent:</span>
-                      <strong className="chip-value">₹{pg.starting_monthly_rent?.toLocaleString('en-IN') || '—'}/mo</strong>
+                      <strong className="chip-value">{rentVal}</strong>
                     </div>
 
-                    {pg.food_available && (
+                    {hasFood && (
                       <div className="detail-chip">
                         <IconUtensils className="w-3.5 h-3.5 text-emerald" />
                         <span>Mess Food Included</span>
@@ -140,15 +145,15 @@ export default function StudentSaved({
 
                   <div className="saved-card-footer">
                     <span className="saved-date">
-                      Saved on {new Date(fav.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
+                      {savedDateStr}
                     </span>
                     {onBrowsePGs && (
                       <button 
                         type="button" 
                         className="btn-view-pg"
-                        onClick={onBrowsePGs}
+                        onClick={() => onBrowsePGs(pg)}
                       >
-                        <span>View PG</span>
+                        <span>View Details</span>
                       </button>
                     )}
                   </div>

@@ -114,42 +114,54 @@ export default function StudentEnquiries({
         <div className="enquiries-list">
           {enquiries.map((enq) => {
             const pg = enq.pg || {};
+            const pgName = enq.pgName || pg.name || 'Verified PG Accommodation';
+            const pgArea = enq.pgArea || pg.areas?.name || pg.address || 'Pune';
+            const sharingType = enq.sharing || enq.room_type_preference || 'Standard Sharing';
+            const slotOrDate = enq.slot || (enq.visit_date ? new Date(enq.visit_date).toLocaleDateString('en-IN', { dateStyle: 'medium' }) : 'Flexible Slot');
+            const submitDate = enq.date || (enq.created_at ? new Date(enq.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently');
+            const isConfirmed = enq.status === 'Confirmed' || enq.status === 'visit_scheduled';
+
             return (
               <article key={enq.id} className="enquiry-card">
                 <div className="enquiry-card-header">
                   <div className="enquiry-pg-info">
                     <IconBuilding className="w-5 h-5 text-indigo" />
                     <div>
-                      <h3 className="enquiry-pg-name">{pg.name || 'Student PG Accommodation'}</h3>
+                      <div className="enquiry-name-row">
+                        <h3 className="enquiry-pg-name">{pgName}</h3>
+                        {enq.refId && <span className="enquiry-ref-pill">Ref: {enq.refId}</span>}
+                      </div>
                       <span className="enquiry-pg-area">
-                        📍 {pg.areas?.name || pg.address || 'Pune'}
+                        📍 {pgArea}
                       </span>
                     </div>
                   </div>
 
-                  <div className={`enquiry-status-pill ${getStatusClass(enq.status)}`}>
+                  <div className={`enquiry-status-pill ${isConfirmed ? 'status-scheduled' : getStatusClass(enq.status)}`}>
                     <IconClock className="w-3.5 h-3.5" />
-                    <span>{getStatusLabel(enq.status)}</span>
+                    <span>{isConfirmed ? '✓ Host Confirmed' : getStatusLabel(enq.status)}</span>
                   </div>
                 </div>
 
                 <div className="enquiry-meta-grid">
                   <div className="meta-box">
-                    <span className="meta-label">Preference:</span>
-                    <span className="meta-val">{enq.room_type_preference || 'Single / Sharing'}</span>
+                    <span className="meta-label">Sharing &amp; Rent:</span>
+                    <span className="meta-val">
+                      {sharingType} {enq.rent ? `(₹${enq.rent}/mo)` : ''}
+                    </span>
                   </div>
 
                   <div className="meta-box">
-                    <span className="meta-label">Scheduled Date:</span>
+                    <span className="meta-label">Visit Slot:</span>
                     <span className="meta-val">
-                      {enq.visit_date ? new Date(enq.visit_date).toLocaleDateString('en-IN', { dateStyle: 'medium' }) : 'Flexible'}
+                      {slotOrDate}
                     </span>
                   </div>
 
                   <div className="meta-box">
                     <span className="meta-label">Submitted:</span>
                     <span className="meta-val">
-                      {new Date(enq.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {submitDate}
                     </span>
                   </div>
                 </div>

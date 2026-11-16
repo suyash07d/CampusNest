@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
+import { getOwnerListing, saveOwnerListing } from '../lib/ownerService';
 import { 
   IconBuilding, 
   IconShield, 
@@ -112,6 +114,20 @@ export default function OwnerDashboard({ onGoToHome }) {
     return INITIAL_LEADS;
   });
 
+  // Load owner's live listing from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    if (user?.id) {
+      getOwnerListing(user.id).then(res => {
+        if (isMounted && res) {
+          if (res.propertyData) setPropertyData(res.propertyData);
+          if (res.photos && res.photos.length > 0) setPhotos(res.photos);
+        }
+      });
+    }
+    return () => { isMounted = false; };
+  }, [user?.id]);
+
   // Listen for real-time inquiries sent from student PG modal
   useEffect(() => {
     const handleInquiryEvent = (e) => {
@@ -156,12 +172,29 @@ export default function OwnerDashboard({ onGoToHome }) {
   };
   const [saveSuccessNotice, setSaveSuccessNotice] = useState(false);
 
-  // Save changes to localStorage & trigger notice
-  const handleSaveAll = () => {
+  // Save changes to localStorage & sync to Supabase
+  const handleSaveAll = async () => {
+    // 1. Local instant synchronous persistence
     if (user?.id) {
       localStorage.setItem(`aplastay_owner_${user.id}`, JSON.stringify(propertyData));
       localStorage.setItem(`aplastay_photos_${user.id}`, JSON.stringify(photos));
+    } else {
+      localStorage.setItem('aplastay_owner_draft', JSON.stringify(propertyData));
+      localStorage.setItem('aplastay_photos_draft', JSON.stringify(photos));
     }
+
+    // 2. Full live PostgreSQL Cloud sync (pg_listings, rooms, photos, pg_colleges)
+    if (user?.id) {
+      try {
+        const syncResult = await saveOwnerListing(user.id, propertyData, photos);
+        if (syncResult?.success) {
+          window.dispatchEvent(new CustomEvent('aplastay:pg_updated', { detail: { pgId: syncResult.pgId } }));
+        }
+      } catch (err) {
+        console.warn('Supabase host listing sync note:', err.message);
+      }
+    }
+
     setSaveSuccessNotice(true);
     setTimeout(() => {
       setSaveSuccessNotice(false);

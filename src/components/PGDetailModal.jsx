@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { supabase } from '../lib/supabase';
 import { 
   IconX, 
   IconMapPin, 
@@ -10,7 +11,8 @@ import {
   IconSparkles,
   IconWhatsApp,
   IconPhone,
-  IconArrowRight
+  IconArrowRight,
+  IconHeart
 } from './Icons';
 import './PGDetailModal.css';
 
@@ -25,6 +27,38 @@ export default function PGDetailModal({ pg, onClose }) {
   const [visitBooked, setVisitBooked] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [isSaved, setIsSaved] = useState(() => {
+    if (typeof window !== 'undefined' && pg?.id) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('aplastay_saved_pgs') || '[]');
+        return saved.includes(pg.id);
+      } catch (e) { /* ignore */ }
+    }
+    return false;
+  });
+
+  const handleToggleSave = () => {
+    if (!pg?.id) return;
+    const nextSaved = !isSaved;
+    setIsSaved(nextSaved);
+    if (typeof window !== 'undefined') {
+      try {
+        const savedIds = JSON.parse(localStorage.getItem('aplastay_saved_pgs') || '[]');
+        const updatedIds = nextSaved
+          ? [...savedIds.filter(id => id !== pg.id), pg.id]
+          : savedIds.filter(id => id !== pg.id);
+        localStorage.setItem('aplastay_saved_pgs', JSON.stringify(updatedIds));
+
+        const savedObjs = JSON.parse(localStorage.getItem('aplastay_saved_pg_objects') || '[]');
+        const updatedObjs = nextSaved
+          ? [pg, ...savedObjs.filter(o => o.id !== pg.id)]
+          : savedObjs.filter(o => o.id !== pg.id);
+        localStorage.setItem('aplastay_saved_pg_objects', JSON.stringify(updatedObjs));
+
+        window.dispatchEvent(new CustomEvent('aplastay:saved_changed', { detail: updatedIds }));
+      } catch (e) { /* ignore */ }
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -91,6 +125,19 @@ export default function PGDetailModal({ pg, onClose }) {
 
         // 3. Dispatch real-time event across app
         window.dispatchEvent(new CustomEvent('aplastay:new_inquiry', { detail: newLead }));
+
+        // 4. Cloud sync to Supabase public.enquiries table
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pg.id);
+        if (isUuid) {
+          supabase.from('enquiries').insert({
+            pg_id: pg.id,
+            room_type_preference: activeSharing,
+            visit_date: visitSlot,
+            message: `Student: ${studentName.trim()} • Phone: ${formattedPhone} • Ref: ${ref}`
+          }).then(({ error }) => {
+            if (error) console.warn('Supabase enquiry insert note:', error.message);
+          });
+        }
       } catch (err) {
         console.error('Failed to store inquiry:', err);
       }
@@ -120,15 +167,26 @@ export default function PGDetailModal({ pg, onClose }) {
         aria-modal="true"
         aria-labelledby="modal-pg-title"
       >
-        {/* Close Button */}
-        <button 
-          type="button" 
-          className="modal-close-btn" 
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          <IconX className="w-5 h-5" />
-        </button>
+        {/* Modal Top Actions */}
+        <div className="modal-top-actions">
+          <button 
+            type="button" 
+            className={`modal-heart-btn ${isSaved ? 'heart-active' : ''}`}
+            onClick={handleToggleSave}
+            title={isSaved ? 'Saved in Shortlist' : 'Save to Shortlist'}
+            aria-label={isSaved ? 'Saved in Shortlist' : 'Save to Shortlist'}
+          >
+            <IconHeart className={`w-4 h-4 ${isSaved ? 'fill-current text-pink' : ''}`} />
+          </button>
+          <button 
+            type="button" 
+            className="modal-close-btn" 
+            onClick={onClose}
+            aria-label="Close modal"
+          >
+            <IconX className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Modal Header Media */}
         <div className="modal-hero-media">
@@ -366,6 +424,16 @@ export default function PGDetailModal({ pg, onClose }) {
           </div>
 
           <div className="footer-actions-cluster">
+            <button 
+              type="button" 
+              className={`btn-footer-shortlist ${isSaved ? 'shortlist-active' : ''}`}
+              onClick={handleToggleSave}
+              title={isSaved ? 'Saved in Shortlist' : 'Save to Shortlist'}
+            >
+              <IconHeart className={`w-4 h-4 ${isSaved ? 'fill-current text-pink' : ''}`} />
+              <span>{isSaved ? 'Shortlisted' : 'Shortlist'}</span>
+            </button>
+
             <a 
               href={whatsAppLink}
               target="_blank"

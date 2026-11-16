@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PREVIEW_PGS } from '../data/mockData';
+import { getLiveApprovedPGs } from '../lib/ownerService';
 import { PUNE_COLLEGES, PUNE_AREAS } from '../data/puneDiscoveryData';
 import { 
   IconMapPin, 
@@ -15,7 +16,8 @@ import {
   IconStar,
   IconWifi,
   IconUtensils,
-  IconChevronDown
+  IconChevronDown,
+  IconHeart
 } from './Icons';
 import './DiscoveryPreview.css';
 
@@ -37,10 +39,79 @@ export default function DiscoveryPreview({
 }) {
   const [selectedGender, setSelectedGender] = useState('all'); // 'all' | 'girls' | 'boys' | 'coed'
   const [selectedCampusFilter, setSelectedCampusFilter] = useState('all');
+  const [onlySaved, setOnlySaved] = useState(false);
+  const [toastNotice, setToastNotice] = useState(null);
+  const [savedPGIds, setSavedPGIds] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('aplastay_saved_pgs');
+        if (saved) return JSON.parse(saved);
+      } catch (e) { /* ignore */ }
+    }
+    return [];
+  });
   const [isCollegeDrawerOpen, setIsCollegeDrawerOpen] = useState(false);
   const [collegeSearchQuery, setCollegeSearchQuery] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [isWaitlistSuccess, setIsWaitlistSuccess] = useState(false);
+  const [livePGs, setLivePGs] = useState([]);
+
+  // Fetch Live Cloud PGs from Supabase
+  useEffect(() => {
+    let isMounted = true;
+    getLiveApprovedPGs().then(listings => {
+      if (isMounted && listings && listings.length > 0) {
+        setLivePGs(listings);
+      }
+    });
+
+    const handlePGUpdate = () => {
+      getLiveApprovedPGs().then(listings => {
+        if (isMounted && listings && listings.length > 0) {
+          setLivePGs(listings);
+        }
+      });
+    };
+    window.addEventListener('aplastay:pg_updated', handlePGUpdate);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('aplastay:pg_updated', handlePGUpdate);
+    };
+  }, []);
+
+  // Merge Live Supabase Listings with verified preview fallback
+  const allAvailablePGs = useMemo(() => {
+    if (livePGs.length === 0) return PREVIEW_PGS;
+    const liveIds = new Set(livePGs.map(p => p.id));
+    return [...livePGs, ...PREVIEW_PGS.filter(p => !liveIds.has(p.id))];
+  }, [livePGs]);
+
+  const handleToggleSave = (e, pg) => {
+    e.stopPropagation();
+    setSavedPGIds(prev => {
+      const isCurrentlySaved = prev.includes(pg.id);
+      const updated = isCurrentlySaved 
+        ? prev.filter(id => id !== pg.id)
+        : [...prev, pg.id];
+      
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('aplastay_saved_pgs', JSON.stringify(updated));
+          const existingObjs = JSON.parse(localStorage.getItem('aplastay_saved_pg_objects') || '[]');
+          const updatedObjs = isCurrentlySaved
+            ? existingObjs.filter(item => (item.id || item.pg?.id) !== pg.id)
+            : [pg, ...existingObjs.filter(item => (item.id || item.pg?.id) !== pg.id)];
+          localStorage.setItem('aplastay_saved_pg_objects', JSON.stringify(updatedObjs));
+          window.dispatchEvent(new CustomEvent('aplastay:saved_changed', { detail: updated }));
+        } catch (err) { /* ignore */ }
+      }
+
+      setToastNotice(isCurrentlySaved ? `Removed ${pg.name} from Shortlist` : `Saved ${pg.name} to Shortlist ❤️`);
+      setTimeout(() => setToastNotice(null), 2500);
+
+      return updated;
+    });
+  };
 
   // Active college from parent searchParams if any
   const activeCollege = useMemo(() => {
@@ -54,7 +125,10 @@ export default function DiscoveryPreview({
 
   // Filtered PG Listings
   const filteredPGs = useMemo(() => {
-    return PREVIEW_PGS.filter(pg => {
+    return allAvailablePGs.filter(pg => {
+      // 0. Shortlist Wishlist Filter
+      if (onlySaved && !savedPGIds.includes(pg.id)) return false;
+
       // 1. Gender Filter
       if (selectedGender === 'girls' && pg.genderBadge !== 'girls') return false;
       if (selectedGender === 'boys' && pg.genderBadge !== 'boys') return false;
@@ -94,7 +168,7 @@ export default function DiscoveryPreview({
 
       return true;
     });
-  }, [selectedGender, selectedCampusFilter, activeFilters, activeCollege]);
+  }, [allAvailablePGs, selectedGender, selectedCampusFilter, activeFilters, activeCollege, onlySaved, savedPGIds]);
 
   // Filtered 45 Colleges for drawer
   const filteredColleges = useMemo(() => {
@@ -199,6 +273,14 @@ export default function DiscoveryPreview({
             >
               🏢 Co-living
             </button>
+            <button
+              type="button"
+              className={`filter-chip chip-shortlist-pill ${onlySaved ? 'chip-active chip-saved' : ''}`}
+              onClick={() => setOnlySaved(!onlySaved)}
+              title="Show only bookmarked PGs"
+            >
+              ❤️ Shortlist {savedPGIds.length > 0 ? `(${savedPGIds.length})` : ''}
+            </button>
           </div>
 
           {/* Popular Campus Filter Pills */}
@@ -264,12 +346,24 @@ export default function DiscoveryPreview({
 
                   {/* Top Floating Badges */}
                   <div className="pg-top-badges">
-                    <span className={`pg-gender-badge ${isGirls ? 'badge-girls' : isBoys ? 'badge-boys' : 'badge-coed'}`}>
-                      {pg.gender}
-                    </span>
-                    <span className="pg-zero-fee-badge">
-                      0% Brokerage
-                    </span>
+                    <div className="pg-top-left-badges">
+                      <span className={`pg-gender-badge ${isGirls ? 'badge-girls' : isBoys ? 'badge-boys' : 'badge-coed'}`}>
+                        {pg.gender}
+                      </span>
+                      <span className="pg-zero-fee-badge">
+                        0% Brokerage
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className={`btn-card-heart ${savedPGIds.includes(pg.id) ? 'heart-active' : ''}`}
+                      onClick={(e) => handleToggleSave(e, pg)}
+                      aria-label={savedPGIds.includes(pg.id) ? 'Remove from Shortlist' : 'Save to Shortlist'}
+                      title={savedPGIds.includes(pg.id) ? 'Saved' : 'Save to Shortlist'}
+                    >
+                      <IconHeart className={`w-4 h-4 ${savedPGIds.includes(pg.id) ? 'fill-current text-pink' : ''}`} />
+                    </button>
                   </div>
 
                   {/* Distance from Campus Tag */}
@@ -345,18 +439,43 @@ export default function DiscoveryPreview({
         {/* Fallback if no PGs match filter */}
         {filteredPGs.length === 0 && (
           <div className="pg-empty-filter-state">
-            <p>No accommodations found matching this specific filter.</p>
-            <button 
-              type="button" 
-              className="btn-reset-filters"
-              onClick={() => {
-                setSelectedGender('all');
-                setSelectedCampusFilter('all');
-                if (onSelectCollege) onSelectCollege(null);
-              }}
-            >
-              Reset Filters to View All PGs
-            </button>
+            {onlySaved ? (
+              <div className="empty-shortlist-prompt">
+                <span className="empty-shortlist-heart">❤️</span>
+                <h4>Your Shortlist is Empty</h4>
+                <p>Click the heart icon on any accommodation card to add it to your shortlist for quick comparison.</p>
+                <button 
+                  type="button" 
+                  className="btn-reset-filters"
+                  onClick={() => setOnlySaved(false)}
+                >
+                  Browse All PGs
+                </button>
+              </div>
+            ) : (
+              <>
+                <p>No accommodations found matching this specific filter.</p>
+                <button 
+                  type="button" 
+                  className="btn-reset-filters"
+                  onClick={() => {
+                    setSelectedGender('all');
+                    setSelectedCampusFilter('all');
+                    setOnlySaved(false);
+                    if (onSelectCollege) onSelectCollege(null);
+                  }}
+                >
+                  Reset Filters to View All PGs
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Floating Toast Notification */}
+        {toastNotice && (
+          <div className="toast-save-notice" role="status">
+            <span>{toastNotice}</span>
           </div>
         )}
 

@@ -714,3 +714,125 @@
     text-align: center;
   }
 }
+
+/* ========================================================================== */
+/* SHORTLIST / WISHLIST HEART & FILTER PILL STYLES                            */
+/* ========================================================================== */
+.pg-top-left-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-card-heart {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-card-heart:hover {
+  background: rgba(15, 23, 42, 0.9);
+  transform: scale(1.1);
+  color: #F43F5E;
+}
+
+.btn-card-heart.heart-active {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: rgba(244, 63, 94, 0.6);
+  color: #F43F5E;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+}
+
+.btn-card-heart.heart-active svg {
+  fill: #F43F5E;
+}
+
+.filter-chip.chip-shortlist-pill {
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.filter-chip.chip-saved {
+  background: linear-gradient(135deg, #E11D48, #BE123C) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35) !important;
+}
+
+/* Empty Shortlist Prompt */
+.empty-shortlist-prompt {
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+
+.empty-shortlist-heart {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.empty-shortlist-prompt h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.empty-shortlist-prompt p {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  max-width: 420px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Floating Toast Notification */
+.toast-save-notice {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  padding: 0.75rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(244, 63, 94, 0.25);
+  z-index: 1000;
+  animation: toastFadeIn 0.25s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+
+.pg-live-cloud-badge {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: #38BDF8;
+  background: rgba(14, 165, 233, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+}
