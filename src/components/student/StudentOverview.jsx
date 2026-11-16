@@ -31,6 +31,7 @@ export default function StudentOverview({
   dataLoading = false,
   onSelectTab,
   onBrowsePGs,
+  onSelectPG,
   onRemoveFavourite
 }) {
   // Active modal: 'radar' | 'journey' | 'preferences' | 'saved' | 'enquiries' | 'anchor' | null
@@ -171,12 +172,17 @@ export default function StudentOverview({
                       setActiveModal(null);
                       onBrowsePGs?.();
                     }}
+                    onSelectPG={(pg) => {
+                      setActiveModal(null);
+                      onSelectPG?.(pg);
+                    }}
                   />
                 )}
 
                 {activeModal === 'enquiries' && (
                   <StudentEnquiries 
                     enquiries={enquiries}
+                    user={user}
                     onNavigateDiscover={() => {
                       setActiveModal(null);
                       onSelectTab('discover');
@@ -184,6 +190,10 @@ export default function StudentOverview({
                     onBrowsePGs={() => {
                       setActiveModal(null);
                       onBrowsePGs?.();
+                    }}
+                    onSelectPG={(pg) => {
+                      setActiveModal(null);
+                      onSelectPG?.(pg);
                     }}
                   />
                 )}

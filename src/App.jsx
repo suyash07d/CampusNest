@@ -17,6 +17,7 @@ import OwnerPortalHero from './components/OwnerPortalHero';
 import AdminLogin from './components/admin/AdminLogin';
 import AdminShell from './components/admin/AdminShell';
 import AplaStayCinematicLoader from './components/AplaStayCinematicLoader';
+import { PUNE_COLLEGES } from './data/puneDiscoveryData';
 import { IconGraduationCap, IconX, IconShield } from './components/Icons';
 import './App.css';
 
@@ -77,11 +78,41 @@ function AplaStayContent() {
 
   const currentView = isAuthenticated ? (userViewOverride || 'dashboard') : 'home';
 
-  const [searchParams, setSearchParams] = useState({
-    city: 'pune',
-    area: 'shivajinagar',
-    college: 'coep-technological-university-shivajinagar-pune',
-    collegeObj: null,
+  const [searchParams, setSearchParams] = useState(() => {
+    let initialCollege = 'coep-technological-university-shivajinagar-pune';
+    let initialCollegeObj = null;
+    let initialArea = 'shivajinagar';
+
+    if (typeof window !== 'undefined') {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryCollege = urlParams.get('college');
+        const queryArea = urlParams.get('area');
+
+        if (queryCollege) {
+          const q = queryCollege.toLowerCase().trim();
+          const match = PUNE_COLLEGES.find(c => 
+            c.slug.toLowerCase().includes(q) || 
+            c.id?.toLowerCase() === q ||
+            c.shortName?.toLowerCase().includes(q)
+          );
+          if (match) {
+            initialCollege = match.slug;
+            initialCollegeObj = match;
+            initialArea = match.areaSlug || initialArea;
+          }
+        } else if (queryArea) {
+          initialArea = queryArea.toLowerCase().trim();
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    return {
+      city: 'pune',
+      area: initialArea,
+      college: initialCollege,
+      collegeObj: initialCollegeObj,
+    };
   });
 
   const [activeFilters, setActiveFilters] = useState({
@@ -416,7 +447,10 @@ function AplaStayContent() {
           role === 'owner' ? (
             <OwnerDashboard onGoToHome={() => setUserViewOverride('home')} />
           ) : (
-            <StudentDashboard onBrowsePGs={handleScrollToDiscovery} />
+            <StudentDashboard 
+              onBrowsePGs={handleScrollToDiscovery}
+              onSelectPG={(pg) => setSelectedPG(pg)}
+            />
           )
         ) : (
           <>

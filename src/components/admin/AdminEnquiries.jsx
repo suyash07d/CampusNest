@@ -32,7 +32,41 @@ export default function AdminEnquiries({ onShowNotice }) {
       const res = await getEnquiries({
         status: filterStatus === 'all' ? undefined : filterStatus,
       });
-      setEnquiries(res.enquiries || []);
+      let fetched = res.enquiries || [];
+
+      // Incorporate local platform inquiries if testing / demo
+      if (typeof window !== 'undefined') {
+        try {
+          const localLeads = JSON.parse(localStorage.getItem('aplastay_owner_leads') || '[]');
+          const localInquiries = JSON.parse(localStorage.getItem('aplastay_my_inquiries') || '[]');
+          const mergedLocal = [...localLeads, ...localInquiries];
+
+          const mapped = mergedLocal.map(lead => ({
+            id: lead.id,
+            room_type_preference: lead.sharing || lead.room_type_preference || 'Standard Sharing',
+            visit_date: lead.date || lead.visit_date,
+            message: lead.notes || lead.message || `Visit requested for slot: ${lead.slot || 'Flexible'}`,
+            status: lead.status === 'Confirmed' ? 'visit_scheduled' : lead.status === 'bed_reserved' ? 'visit_scheduled' : 'pending',
+            created_at: lead.date || lead.created_at || new Date().toISOString(),
+            student: {
+              full_name: lead.name || 'Student Member',
+              phone: lead.phone || '9876543210',
+              email: `${(lead.name || 'student').toLowerCase().replace(/\s+/g, '')}@student.pune`,
+            },
+            pg: {
+              name: lead.pgName || 'AplaStay Accommodation',
+              address: lead.campus || lead.pgArea || 'Pune',
+            },
+            is_local: true,
+          }));
+
+          const existingIds = new Set(fetched.map(item => item.id));
+          const uniqueLocal = mapped.filter(item => !existingIds.has(item.id));
+          fetched = [...uniqueLocal, ...fetched];
+        } catch (err) { /* ignore */ }
+      }
+
+      setEnquiries(fetched);
     } catch (err) {
       console.error('Failed to load enquiries:', err);
     } finally {
@@ -41,23 +75,8 @@ export default function AdminEnquiries({ onShowNotice }) {
   }, [filterStatus]);
 
   useEffect(() => {
-    let isMounted = true;
-    getEnquiries({
-      status: filterStatus === 'all' ? undefined : filterStatus,
-    }).then(res => {
-      if (isMounted) {
-        setEnquiries(res.enquiries || []);
-        setLoading(false);
-      }
-    }).catch(err => {
-      console.error('Failed to load enquiries:', err);
-      if (isMounted) setLoading(false);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [filterStatus]);
+    fetchEnquiriesList();
+  }, [fetchEnquiriesList]);
 
   const handleStartStatusUpdate = (enquiry, targetStatus, e) => {
     e?.stopPropagation();
@@ -75,11 +94,27 @@ export default function AdminEnquiries({ onShowNotice }) {
 
     setStatusDialog(prev => ({ ...prev, loading: true }));
     try {
-      await updateEnquiryStatus({
-        enquiryId: enquiry.id,
-        status: targetStatus,
-        notes,
-      });
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(enquiry.id);
+      if (isUuid) {
+        await updateEnquiryStatus({
+          enquiryId: enquiry.id,
+          status: targetStatus,
+          notes,
+        });
+      }
+
+      // Also update local storage registries
+      if (typeof window !== 'undefined') {
+        try {
+          const leads = JSON.parse(localStorage.getItem('aplastay_owner_leads') || '[]');
+          const updatedLeads = leads.map(l => l.id === enquiry.id ? { ...l, status: targetStatus } : l);
+          localStorage.setItem('aplastay_owner_leads', JSON.stringify(updatedLeads));
+
+          const inqs = JSON.parse(localStorage.getItem('aplastay_my_inquiries') || '[]');
+          const updatedInqs = inqs.map(i => i.id === enquiry.id ? { ...i, status: targetStatus } : i);
+          localStorage.setItem('aplastay_my_inquiries', JSON.stringify(updatedInqs));
+        } catch (e) { /* ignore */ }
+      }
 
       setEnquiries(prev =>
         prev.map(e => e.id === enquiry.id ? { ...e, status: targetStatus } : e)

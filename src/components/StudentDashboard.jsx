@@ -19,7 +19,7 @@ import StudentProfile from './student/StudentProfile';
 
 import './StudentDashboard.css';
 
-export default function StudentDashboard({ onBrowsePGs }) {
+export default function StudentDashboard({ onBrowsePGs, onSelectPG }) {
   const { user, profile, refreshProfile, signOut } = useAuth();
   
   const [activeTab, setActiveTab] = useState('overview');
@@ -226,6 +226,7 @@ export default function StudentDashboard({ onBrowsePGs }) {
                   dataLoading={dataLoading}
                   onSelectTab={setActiveTab}
                   onBrowsePGs={onBrowsePGs}
+                  onSelectPG={onSelectPG}
                   onRemoveFavourite={handleRemoveFavourite}
                 />
               </motion.div>
@@ -260,6 +261,7 @@ export default function StudentDashboard({ onBrowsePGs }) {
                   onRemoveFavourite={handleRemoveFavourite}
                   onNavigateDiscover={() => setActiveTab('discover')}
                   onBrowsePGs={onBrowsePGs}
+                  onSelectPG={onSelectPG}
                 />
               </motion.div>
             )}
@@ -274,8 +276,10 @@ export default function StudentDashboard({ onBrowsePGs }) {
               >
                 <StudentEnquiries 
                   enquiries={enquiries}
+                  user={user}
                   onNavigateDiscover={() => setActiveTab('discover')}
                   onBrowsePGs={onBrowsePGs}
+                  onSelectPG={onSelectPG}
                 />
               </motion.div>
             )}

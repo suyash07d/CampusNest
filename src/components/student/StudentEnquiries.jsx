@@ -1,4 +1,5 @@
-import { motion } from 'motion/react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconMail, 
   IconCompass, 
@@ -6,22 +7,72 @@ import {
   IconCalendar, 
   IconCheckCircle, 
   IconClock, 
-  IconBuilding 
+  IconBuilding,
+  IconPhone,
+  IconX,
+  IconArrowRight,
+  IconCheck
 } from '../Icons';
+import { updateStudentEnquiryStatus } from '../../lib/studentService';
 
 export default function StudentEnquiries({
   enquiries = [],
   onNavigateDiscover,
   onBrowsePGs,
+  onSelectPG,
+  user,
 }) {
+  const [localEnquiries, setLocalEnquiries] = useState(enquiries);
+  const [toastMsg, setToastMsg] = useState(null);
+
+  // Sync if parent prop updates
+  const list = enquiries.length > 0 ? enquiries : localEnquiries;
+
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  };
+
+  const handleUpdateStatus = async (enquiryId, newStatus) => {
+    // 1. Update local storage
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = JSON.parse(localStorage.getItem('aplastay_my_inquiries') || '[]');
+        const updated = stored.map(item => item.id === enquiryId ? { ...item, status: newStatus } : item);
+        localStorage.setItem('aplastay_my_inquiries', JSON.stringify(updated));
+        setLocalEnquiries(updated);
+        window.dispatchEvent(new CustomEvent('aplastay:inquiry_status_updated', { detail: { enquiryId, status: newStatus } }));
+      } catch (e) { /* ignore */ }
+    }
+
+    // 2. Sync to Supabase if authenticated
+    if (user?.id) {
+      try {
+        await updateStudentEnquiryStatus(user.id, enquiryId, newStatus);
+      } catch (err) {
+        console.warn('Could not sync status remotely:', err);
+      }
+    }
+
+    const labels = {
+      closed: 'Visit request cancelled.',
+      bed_reserved: 'Congratulations! Bed marked as reserved 🎉',
+      visit_scheduled: 'Visit confirmed on your calendar.',
+    };
+    showToast(labels[newStatus] || 'Status updated.');
+  };
+
   const getStatusLabel = (status) => {
     switch (status) {
+      case 'bed_reserved':
+        return 'Bed Reserved';
+      case 'visit_scheduled':
+      case 'Confirmed':
+        return 'Host Confirmed';
       case 'contacted':
         return 'Host Contacted';
-      case 'visit_scheduled':
-        return 'Visit Scheduled';
       case 'closed':
-        return 'Enquiry Closed';
+        return 'Visit Cancelled';
       default:
         return 'Awaiting Host Response';
     }
@@ -29,10 +80,13 @@ export default function StudentEnquiries({
 
   const getStatusClass = (status) => {
     switch (status) {
+      case 'bed_reserved':
+        return 'status-reserved';
+      case 'visit_scheduled':
+      case 'Confirmed':
+        return 'status-scheduled';
       case 'contacted':
         return 'status-contacted';
-      case 'visit_scheduled':
-        return 'status-scheduled';
       case 'closed':
         return 'status-closed';
       default:
@@ -40,22 +94,51 @@ export default function StudentEnquiries({
     }
   };
 
+  const getWhatsAppLink = (enq) => {
+    const rawPhone = enq.ownerPhone || enq.phone || '9876543210';
+    const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
+    const pgName = enq.pgName || enq.pg?.name || 'the accommodation';
+    const ref = enq.refId || (enq.id ? enq.id.slice(0, 8) : 'AS-VISIT');
+    const sharing = enq.sharing || enq.room_type_preference || 'Sharing';
+    const slot = enq.slot || (enq.visit_date ? new Date(enq.visit_date).toLocaleDateString('en-IN') : 'upcoming slot');
+    
+    const msg = encodeURIComponent(
+      `Hello! I requested an in-person room visit on AplaStay for ${pgName} (Ref: ${ref}) for ${sharing} on ${slot}. Looking forward to confirming the schedule!`
+    );
+    return `https://wa.me/91${cleanPhone}?text=${msg}`;
+  };
+
   return (
     <div className="student-enquiries-view">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMsg && (
+          <motion.div 
+            className="student-toast-notice"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+          >
+            <IconCheck className="w-4 h-4 text-emerald" />
+            <span>{toastMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="section-title-strip">
         <div>
-          <h2 className="section-heading">My Campus Enquiries & Visits</h2>
+          <h2 className="section-heading">My Campus Enquiries &amp; Visits</h2>
           <p className="section-subheading">
             Track host communications, scheduled property tours, and room availability with zero brokerage.
           </p>
         </div>
         <div className="enquiries-counter-badge">
           <IconMail className="w-4 h-4 text-amber" />
-          <span>{enquiries.length} Inquiries</span>
+          <span>{list.length} Inquiries</span>
         </div>
       </div>
 
-      {enquiries.length === 0 ? (
+      {list.length === 0 ? (
         <motion.div 
           className="empty-state-card"
           initial={{ opacity: 0, y: 12 }}
@@ -112,7 +195,7 @@ export default function StudentEnquiries({
         </motion.div>
       ) : (
         <div className="enquiries-list">
-          {enquiries.map((enq) => {
+          {list.map((enq) => {
             const pg = enq.pg || {};
             const pgName = enq.pgName || pg.name || 'Verified PG Accommodation';
             const pgArea = enq.pgArea || pg.areas?.name || pg.address || 'Pune';
@@ -120,9 +203,11 @@ export default function StudentEnquiries({
             const slotOrDate = enq.slot || (enq.visit_date ? new Date(enq.visit_date).toLocaleDateString('en-IN', { dateStyle: 'medium' }) : 'Flexible Slot');
             const submitDate = enq.date || (enq.created_at ? new Date(enq.created_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently');
             const isConfirmed = enq.status === 'Confirmed' || enq.status === 'visit_scheduled';
+            const isBedReserved = enq.status === 'bed_reserved';
+            const isClosed = enq.status === 'closed';
 
             return (
-              <article key={enq.id} className="enquiry-card">
+              <article key={enq.id} className={`enquiry-card ${isClosed ? 'is-closed-card' : ''}`}>
                 <div className="enquiry-card-header">
                   <div className="enquiry-pg-info">
                     <IconBuilding className="w-5 h-5 text-indigo" />
@@ -137,9 +222,9 @@ export default function StudentEnquiries({
                     </div>
                   </div>
 
-                  <div className={`enquiry-status-pill ${isConfirmed ? 'status-scheduled' : getStatusClass(enq.status)}`}>
+                  <div className={`enquiry-status-pill ${getStatusClass(enq.status)}`}>
                     <IconClock className="w-3.5 h-3.5" />
-                    <span>{isConfirmed ? '✓ Host Confirmed' : getStatusLabel(enq.status)}</span>
+                    <span>{getStatusLabel(enq.status)}</span>
                   </div>
                 </div>
 
@@ -172,6 +257,70 @@ export default function StudentEnquiries({
                     <p className="quote-text">&ldquo;{enq.message}&rdquo;</p>
                   </div>
                 )}
+
+                {/* Direct Action Hub for Student */}
+                <div className="enquiry-actions-bar">
+                  <div className="enquiry-contact-btns">
+                    <a
+                      href={getWhatsAppLink(enq)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-enquiry-wa"
+                      title="Follow up with host on WhatsApp"
+                    >
+                      <IconPhone className="w-3.5 h-3.5" />
+                      <span>WhatsApp Host</span>
+                    </a>
+
+                    <button
+                      type="button"
+                      className="btn-enquiry-inspect"
+                      onClick={() => {
+                        if (onSelectPG) onSelectPG(pg.id ? pg : { ...enq, name: pgName, address: pgArea });
+                        else if (onBrowsePGs) onBrowsePGs(pg);
+                      }}
+                    >
+                      <span>View PG Details</span>
+                      <IconArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {!isClosed && !isBedReserved && (
+                    <div className="enquiry-status-controls">
+                      <button
+                        type="button"
+                        className="btn-status-bed"
+                        onClick={() => handleUpdateStatus(enq.id, 'bed_reserved')}
+                        title="Mark bed as successfully reserved"
+                      >
+                        <IconCheck className="w-3.5 h-3.5" />
+                        <span>Reserve Bed</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="btn-status-cancel"
+                        onClick={() => handleUpdateStatus(enq.id, 'closed')}
+                        title="Cancel this visit request"
+                      >
+                        <IconX className="w-3.5 h-3.5" />
+                        <span>Cancel</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {isBedReserved && (
+                    <div className="enquiry-bed-confirmed-tag">
+                      🎉 Bed Confirmed
+                    </div>
+                  )}
+
+                  {isClosed && (
+                    <span className="enquiry-cancelled-tag">
+                      Cancelled
+                    </span>
+                  )}
+                </div>
               </article>
             );
           })}

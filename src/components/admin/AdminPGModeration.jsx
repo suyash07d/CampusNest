@@ -63,7 +63,44 @@ export default function AdminPGModeration({ onShowNotice, initialSelectedListing
         status: filterStatus === 'all' ? undefined : filterStatus,
         query: searchQuery,
       });
-      setListings(res.listings || []);
+      let fetched = res.listings || [];
+
+      // Also incorporate local host listings submitted via /owner
+      if (typeof window !== 'undefined') {
+        try {
+          const localOwnerData = localStorage.getItem('aplastay_owner_listing');
+          if (localOwnerData) {
+            const parsed = JSON.parse(localOwnerData);
+            const localListing = {
+              id: parsed.id || 'local-owner-listing',
+              name: parsed.name || 'Owner PG',
+              address: parsed.address || 'Pune Campus Vicinity',
+              gender_type: parsed.gender_type || parsed.genderBadge || 'coed',
+              starting_monthly_rent: parsed.starting_monthly_rent || 7500,
+              security_deposit: parsed.security_deposit || 15000,
+              notice_period_days: parsed.notice_period_days || 30,
+              food_available: parsed.food_available ?? true,
+              status: parsed.status || 'pending',
+              created_at: parsed.updated_at || new Date().toISOString(),
+              owner: {
+                full_name: parsed.ownerName || 'Host Member',
+                phone: parsed.ownerPhone || '9876543210',
+              },
+              area: { name: parsed.areaName || 'Pune' },
+              rooms: parsed.rooms || [],
+              is_local_sync: true,
+            };
+
+            if (!fetched.some(item => item.id === localListing.id)) {
+              if (filterStatus === 'all' || filterStatus === localListing.status) {
+                fetched = [localListing, ...fetched];
+              }
+            }
+          }
+        } catch (err) { /* ignore */ }
+      }
+
+      setListings(fetched);
     } catch (err) {
       console.error('Failed to load PG listings for moderation:', err);
     } finally {
@@ -111,11 +148,28 @@ export default function AdminPGModeration({ onShowNotice, initialSelectedListing
 
     setModerationDialog(prev => ({ ...prev, loading: true }));
     try {
-      await moderatePGListing({
-        pgId: pg.id,
-        newStatus: targetStatus,
-        notes,
-      });
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pg.id);
+      if (isUuid) {
+        await moderatePGListing({
+          pgId: pg.id,
+          newStatus: targetStatus,
+          notes,
+        });
+      }
+
+      // Also persist to local owner listing if matching
+      if (typeof window !== 'undefined') {
+        try {
+          const localOwnerData = localStorage.getItem('aplastay_owner_listing');
+          if (localOwnerData) {
+            const parsed = JSON.parse(localOwnerData);
+            if (parsed.id === pg.id || pg.is_local_sync) {
+              parsed.status = targetStatus;
+              localStorage.setItem('aplastay_owner_listing', JSON.stringify(parsed));
+            }
+          }
+        } catch (err) { /* ignore */ }
+      }
 
       // Update local state
       setListings(prev =>

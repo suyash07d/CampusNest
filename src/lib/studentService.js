@@ -107,6 +107,65 @@ export async function getStudentEnquiries(studentId) {
  * @param {string} studentId 
  * @param {string} favouriteId 
  */
+export async function addStudentSavedPG(studentId, pgId) {
+  if (!studentId || !pgId) return { success: false };
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pgId);
+  if (!isUuid) return { success: true, localOnly: true };
+
+  try {
+    const { data, error } = await supabase
+      .from('favourites')
+      .upsert({
+        student_id: studentId,
+        pg_id: pgId,
+      }, { onConflict: 'student_id,pg_id' })
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      console.warn('addStudentSavedPG warning:', error.message);
+    }
+
+    await logActivity({
+      actorId: studentId,
+      actorRole: 'student',
+      action: 'pg_favourited',
+      targetType: 'favourite',
+      targetId: pgId,
+    });
+
+    return { success: true, data };
+  } catch (err) {
+    console.warn('addStudentSavedPG exception:', err.message);
+    return { success: false };
+  }
+}
+
+export async function updateStudentEnquiryStatus(studentId, enquiryId, status) {
+  if (!studentId || !enquiryId) return { success: false };
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(enquiryId);
+  if (!isUuid) return { success: true, localOnly: true };
+
+  try {
+    const { error } = await supabase
+      .from('enquiries')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', enquiryId)
+      .eq('student_id', studentId);
+
+    if (error) {
+      console.warn('updateStudentEnquiryStatus warning:', error.message);
+    }
+    return { success: true };
+  } catch (err) {
+    console.warn('updateStudentEnquiryStatus error:', err.message);
+    return { success: false };
+  }
+}
+
 export async function removeStudentSavedPG(studentId, favouriteId) {
   if (!studentId || !favouriteId) return { success: false };
 
