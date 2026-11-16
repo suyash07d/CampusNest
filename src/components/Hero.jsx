@@ -884,105 +884,52 @@ export default function Hero({ onSearchSubmit, onOpenOwnerModal }) {
             ) : null}
           </AnimatePresence>
 
-          {/* Visual Composition Flow (Default State) */}
+          {/* Sleek Compact Quick-Value Ribbon */}
           {!selectedCollege && (
-            <motion.div variants={fadeUp} className="hero-visual-composition">
-              {/* Left Floating Badge: Walking Distance to Campus */}
-              <div className="composition-card card-left">
-                <div className="comp-icon-box bg-emerald">
-                  <IconMapPin className="comp-icon text-emerald" />
+            <motion.div variants={fadeUp} className="hero-compact-ribbon">
+              <div className="compact-ribbon-item">
+                <div className="ribbon-icon-circle bg-emerald-subtle">
+                  <IconMapPin className="ribbon-icon text-emerald" />
                 </div>
-                <div className="comp-text">
-                  <div className="comp-title">350m from College Gate</div>
-                  <div className="comp-sub">Accurate pedestrian walk times • Morning 8 AM lectures made easy</div>
-                </div>
-              </div>
-
-              {/* Center Stage Preview: Real Student Journey Card */}
-              <div className="composition-center-hero">
-                <div className="student-journey-badge">
-                  <IconGraduationCap className="w-4 h-4 text-indigo" />
-                  <span>Student Journey: Pune Campus Anchor</span>
-                </div>
-                <div className="student-journey-flow">
-                  <div className="flow-node">
-                    <span className="node-city">Pune</span>
-                    <span className="node-sub">Launch City</span>
-                  </div>
-                  <div className="flow-arrow">→</div>
-                  <div className="flow-node">
-                    <span className="node-area">
-                      {selectedAreaSlug === 'all' ? '73 Localities' : currentAreaObj.name}
-                    </span>
-                    <span className="node-sub">Locality</span>
-                  </div>
-                  <div className="flow-arrow">→</div>
-                  <div className="flow-node">
-                    <span className="node-college">
-                      {selectedCollege ? selectedCollege.shortName : '45+ Campuses'}
-                    </span>
-                    <span className="node-sub">SPPU &amp; DTE Anchor</span>
-                  </div>
-                  <div className="flow-arrow">→</div>
-                  <div className="flow-node flow-highlight">
-                    <span className="node-result">Verified PGs</span>
-                    <span className="node-sub">Zero Brokerage</span>
-                  </div>
+                <div className="ribbon-text">
+                  <strong>&lt; 500m to Campus Gates</strong>
+                  <span>Accurate pedestrian walk times</span>
                 </div>
               </div>
 
-              {/* Right Floating Badge: Nutritious Food & Wi-Fi */}
-              <div className="composition-card card-right">
-                <div className="comp-icon-box bg-amber">
-                  <IconSparkles className="comp-icon text-amber" />
+              <div className="compact-ribbon-divider" />
+
+              <div className="compact-ribbon-item">
+                <div className="ribbon-icon-circle bg-cyan-subtle">
+                  <IconShield className="ribbon-icon text-cyan" />
                 </div>
-                <div className="comp-text">
-                  <div className="comp-title">Home Mess &amp; Direct Owners</div>
-                  <div className="comp-sub">Curated hygienic mess plans • Zero broker commission</div>
+                <div className="ribbon-text">
+                  <strong>100% Zero Brokerage</strong>
+                  <span>Direct owner rates &amp; contact</span>
                 </div>
               </div>
 
-              {/* Campus Student Living Showcase Card (Official Brand Identity Integration) */}
-              <div className="campus-living-showcase-card">
-                <div className="showcase-card-inner">
-                  <div className="showcase-header">
-                    <div className="showcase-badge">
-                      <span className="live-campus-dot" />
-                      <span>Verified Pune Campus Living</span>
-                    </div>
-                    <span className="showcase-anchor-tag">45+ SPPU &amp; DTE Campuses Mapped</span>
-                  </div>
+              <div className="compact-ribbon-divider" />
 
-                  <div className="showcase-body-grid">
-                    <div className="showcase-headline-group">
-                      <span className="showcase-brand-label">AplaStay Campus Ecosystem</span>
-                      <h3 className="showcase-main-heading">
-                        Your Next Home, Near Your College.
-                      </h3>
-                      <p className="showcase-lead-para">
-                        Discover verified PGs and accommodations built for student life with honest gate walking times, hygienic food options, and direct owner pricing.
-                      </p>
-                    </div>
+              <div className="compact-ribbon-item">
+                <div className="ribbon-icon-circle bg-amber-subtle">
+                  <IconSparkles className="ribbon-icon text-amber" />
+                </div>
+                <div className="ribbon-text">
+                  <strong>Hygienic Mess &amp; Food</strong>
+                  <span>Home-style nutritious plans</span>
+                </div>
+              </div>
 
-                    <div className="showcase-features-cluster">
-                      <div className="feature-pill pill-violet">
-                        <span className="feature-dot dot-violet" />
-                        <span className="feature-title">Explore Near Your College</span>
-                      </div>
-                      <div className="feature-pill pill-cyan">
-                        <span className="feature-dot dot-cyan" />
-                        <span className="feature-title">Verified PGs &amp; Listings</span>
-                      </div>
-                      <div className="feature-pill pill-blue">
-                        <span className="feature-dot dot-blue" />
-                        <span className="feature-title">Real Reviews From Students</span>
-                      </div>
-                      <div className="feature-pill pill-pink">
-                        <span className="feature-dot dot-pink" />
-                        <span className="feature-title">Save &amp; Compare Your Favorites</span>
-                      </div>
-                    </div>
-                  </div>
+              <div className="compact-ribbon-divider" />
+
+              <div className="compact-ribbon-item">
+                <div className="ribbon-icon-circle bg-violet-subtle">
+                  <IconBuilding className="ribbon-icon text-violet" />
+                </div>
+                <div className="ribbon-text">
+                  <strong>Single, Double &amp; Triple</strong>
+                  <span>Transparent sharing pricing</span>
                 </div>
               </div>
             </motion.div>

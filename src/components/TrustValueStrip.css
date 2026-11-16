@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .trust-strip-section {
-  padding: 60px 0 70px;
+  padding: 45px 0 50px;
   background-color: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
@@ -13,7 +13,7 @@
 .trust-strip-header {
   text-align: center;
   max-width: 680px;
-  margin: 0 auto 3rem;
+  margin: 0 auto 1.75rem;
 }
 
 .trust-label-badge {
@@ -48,7 +48,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
-  margin-bottom: 2.75rem;
+  margin-bottom: 1.5rem;
 }
 
 .trust-card {

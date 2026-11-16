@@ -442,6 +442,7 @@ function AplaStayContent() {
                 college: college.slug,
                 collegeObj: college,
               }))}
+              onSelectPG={(pg) => setSelectedPG(pg)}
               onOpenOwnerModal={() => setIsOwnerModalOpen(true)}
             />
 

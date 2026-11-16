@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { PREVIEW_PGS } from '../data/mockData';
 import { PUNE_COLLEGES, PUNE_AREAS } from '../data/puneDiscoveryData';
 import { 
   IconMapPin, 
@@ -10,335 +11,428 @@ import {
   IconBell, 
   IconSearch, 
   IconSparkles,
-  IconArrowRight
+  IconArrowRight,
+  IconStar,
+  IconWifi,
+  IconUtensils,
+  IconChevronDown
 } from './Icons';
 import './DiscoveryPreview.css';
 
-const STREAM_TABS = [
-  { id: 'all', label: 'All Streams (45)' },
-  { id: 'Engineering', label: 'Engineering & Tech' },
-  { id: 'Management', label: 'Management / MBA' },
-  { id: 'Science', label: 'Arts & Science' },
-  { id: 'Commerce', label: 'Commerce' },
-  { id: 'Law', label: 'Law' },
-  { id: 'Pharmacy', label: 'Pharmacy' },
-  { id: 'Architecture', label: 'Architecture' },
-  { id: 'Medical', label: 'Medical' },
+// Popular Pune Campuses for 1-click filter
+const POPULAR_CAMPUSES = [
+  { id: 'all', label: 'All Pune Campuses' },
+  { id: 'coep', label: 'Near COEP Tech', matchKeyword: 'COEP' },
+  { id: 'mit', label: 'Near MIT-WPU', matchKeyword: 'MIT' },
+  { id: 'dypatil', label: 'Near DY Patil & PCCOE', matchKeyword: 'DY Patil' },
+  { id: 'symbiosis', label: 'Near Symbiosis', matchKeyword: 'Symbiosis' },
 ];
 
-export default function DiscoveryPreview({ searchParams, onSelectCollege, onOpenOwnerModal }) {
-  const [activeStream, setActiveStream] = useState('all');
-  const [filterQuery, setFilterQuery] = useState('');
+export default function DiscoveryPreview({ 
+  searchParams, 
+  activeFilters = {}, 
+  onSelectCollege, 
+  onSelectPG,
+  onOpenOwnerModal 
+}) {
+  const [selectedGender, setSelectedGender] = useState('all'); // 'all' | 'girls' | 'boys' | 'coed'
+  const [selectedCampusFilter, setSelectedCampusFilter] = useState('all');
+  const [isCollegeDrawerOpen, setIsCollegeDrawerOpen] = useState(false);
+  const [collegeSearchQuery, setCollegeSearchQuery] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [isWaitlistSuccess, setIsWaitlistSuccess] = useState(false);
 
-  // Identify active college anchor from searchParams or fallback to COEP
+  // Active college from parent searchParams if any
   const activeCollege = useMemo(() => {
     if (searchParams?.collegeObj) return searchParams.collegeObj;
     if (searchParams?.college) {
       const match = PUNE_COLLEGES.find(c => c.slug === searchParams.college || c.id === searchParams.college);
       if (match) return match;
     }
-    // Default fallback to first verified college
-    return PUNE_COLLEGES[0];
+    return null;
   }, [searchParams]);
 
-  // Filter colleges based on stream tab and filterQuery
-  const filteredColleges = useMemo(() => {
-    const q = filterQuery.trim().toLowerCase();
-    return PUNE_COLLEGES.filter(c => {
-      // Stream filter
-      if (activeStream !== 'all') {
-        const hasStream = c.categories.some(cat => 
-          cat.toLowerCase().includes(activeStream.toLowerCase())
-        );
-        if (!hasStream) return false;
+  // Filtered PG Listings
+  const filteredPGs = useMemo(() => {
+    return PREVIEW_PGS.filter(pg => {
+      // 1. Gender Filter
+      if (selectedGender === 'girls' && pg.genderBadge !== 'girls') return false;
+      if (selectedGender === 'boys' && pg.genderBadge !== 'boys') return false;
+      if (selectedGender === 'coed' && pg.genderBadge !== 'coed') return false;
+
+      // 2. Props Active Filters (from Navbar / Hero search)
+      if (activeFilters.girlsOnly && pg.genderBadge !== 'girls') return false;
+      if (activeFilters.boysOnly && pg.genderBadge !== 'boys') return false;
+      if (activeFilters.coed && pg.genderBadge !== 'coed') return false;
+      if (activeFilters.walkingDistance) {
+        const meters = parseInt(pg.distance) || 999;
+        if (meters > 400) return false;
       }
-      // Query filter
-      if (q) {
-        const matchName = c.name.toLowerCase().includes(q);
-        const matchShort = c.shortName.toLowerCase().includes(q);
-        const matchArea = c.areaSlug.toLowerCase().includes(q);
-        const matchPincode = c.pincode ? c.pincode.includes(q) : false;
-        const matchAliases = c.aliases ? c.aliases.some(a => a.toLowerCase().includes(q)) : false;
-        if (!matchName && !matchShort && !matchArea && !matchPincode && !matchAliases) {
-          return false;
+      if (activeFilters.mealsIncluded) {
+        const hasMeal = pg.tags?.some(t => t.toLowerCase().includes('meal')) ||
+                        pg.amenities?.some(a => a.name.toLowerCase().includes('meal'));
+        if (!hasMeal) return false;
+      }
+
+      // 3. College Shortcut Filter
+      if (selectedCampusFilter !== 'all') {
+        const campus = POPULAR_CAMPUSES.find(c => c.id === selectedCampusFilter);
+        if (campus && campus.matchKeyword) {
+          const matchTarget = pg.targetCollege.toLowerCase().includes(campus.matchKeyword.toLowerCase());
+          if (!matchTarget) return false;
         }
       }
+
+      // 4. Parent SearchParams College Filter
+      if (activeCollege) {
+        const searchWord = (activeCollege.shortName || activeCollege.name).toLowerCase();
+        const matchesCollege = pg.targetCollege.toLowerCase().includes(searchWord) ||
+                               pg.area.toLowerCase().includes((activeCollege.areaName || '').toLowerCase());
+        // If there's an exact match, prefer it; otherwise show all if none match
+        if (matchesCollege) return true;
+      }
+
       return true;
     });
-  }, [activeStream, filterQuery]);
+  }, [selectedGender, selectedCampusFilter, activeFilters, activeCollege]);
 
-  const handleWaitlistSubmit = (e) => {
-    e.preventDefault();
-    if (studentEmail) {
-      setIsWaitlistSuccess(true);
-    }
-  };
+  // Filtered 45 Colleges for drawer
+  const filteredColleges = useMemo(() => {
+    const q = collegeSearchQuery.trim().toLowerCase();
+    if (!q) return PUNE_COLLEGES.slice(0, 12); // Show top 12 initially in drawer
+    return PUNE_COLLEGES.filter(c => 
+      c.name.toLowerCase().includes(q) ||
+      c.shortName.toLowerCase().includes(q) ||
+      c.areaName.toLowerCase().includes(q) ||
+      (c.pincode && c.pincode.includes(q))
+    );
+  }, [collegeSearchQuery]);
 
-  const handleCollegePick = (college) => {
+  const handlePickCollege = (college) => {
     if (onSelectCollege) {
       onSelectCollege(college);
     }
+    // Match quick campus shortcut if available
+    if (college.shortName.includes('COEP')) setSelectedCampusFilter('coep');
+    else if (college.shortName.includes('MIT')) setSelectedCampusFilter('mit');
+    else if (college.shortName.includes('DY Patil')) setSelectedCampusFilter('dypatil');
+    else if (college.shortName.includes('Symbiosis')) setSelectedCampusFilter('symbiosis');
+    else setSelectedCampusFilter('all');
+
+    // Scroll to the verified PGs
     const el = document.getElementById('discovery');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleWaitlistSubmit = (e) => {
+    e.preventDefault();
+    if (studentEmail) setIsWaitlistSuccess(true);
   };
 
   return (
     <section id="discovery" className="discovery-section" aria-label="Pune Campus PG Discovery Hub">
       <div className="container">
         
-        {/* Verification Mission Alert */}
-        <div className="demo-disclaimer-card">
-          <div className="disclaimer-icon-wrap">
-            <IconShield className="disclaimer-icon" />
+        {/* Section Header */}
+        <div className="discovery-header-compact">
+          <div className="discovery-titles">
+            <div className="discovery-badge-pill">
+              <IconSparkles className="w-3.5 h-3.5 text-indigo" />
+              <span>VERIFIED PUNE STUDENT HOUSING • ZERO BROKERAGE</span>
+            </div>
+            <h2 className="discovery-main-title">
+              Verified Student PGs &amp; Hostels
+            </h2>
+            <p className="discovery-subtitle">
+              Inspect honest walking distances to college gates, check transparent multi-tier sharing pricing (Single, Double, Triple), and connect with hosts directly.
+            </p>
           </div>
-          <div className="disclaimer-text">
-            <strong>AplaStay Pune Verification Mission</strong>: We are currently conducting on-the-ground 
-            audits of student accommodations, PGs, and mess providers within walking radius of 45+ official SPPU 
-            and DTE Maharashtra campuses. Zero fabricated distances. Zero broker surprise charges.
+
+          {/* Quick Stats Pill */}
+          <div className="discovery-metrics-pill">
+            <div className="metric-item">
+              <span className="metric-number">100%</span>
+              <span className="metric-label">Zero Brokerage</span>
+            </div>
+            <div className="metric-divider" />
+            <div className="metric-item">
+              <span className="metric-number">&lt; 500m</span>
+              <span className="metric-label">Average Walk</span>
+            </div>
+            <div className="metric-divider" />
+            <div className="metric-item">
+              <span className="metric-number">₹6.5k</span>
+              <span className="metric-label">Starting Rent</span>
+            </div>
           </div>
         </div>
 
-        {/* Section Header */}
-        <motion.div 
-          className="discovery-header-row"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <div className="discovery-titles">
-            <div className="discovery-badge">
-              <IconSparkles className="w-4 h-4 text-indigo" />
-              <span>PUNE CAMPUS DISCOVERY &amp; PG RADAR</span>
-            </div>
-            <h2 className="discovery-main-title">
-              PG discovery for this college is coming next
-            </h2>
-            <p className="discovery-subtitle">
-              AplaStay is actively indexing gate-measured student housing for verified Pune institutions.
-              Select any college anchor below to check audit status or register for early access.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* ================================================================= */}
-        {/* ACTIVE CAMPUS ANCHOR SPOTLIGHT CARD (Requirement 6)               */}
-        {/* ================================================================= */}
-        {activeCollege && (
-          <motion.div 
-            className="active-anchor-spotlight"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-          >
-            <div className="spotlight-card">
-              <div className="spotlight-header">
-                <div className="spotlight-badge-group">
-                  <span className="spotlight-live-pulse" />
-                  <span className="spotlight-tag">ACTIVE CAMPUS ANCHOR</span>
-                  <span className="spotlight-code">{activeCollege.instituteCode || 'SPPU / DTE Approved'}</span>
-                </div>
-                {activeCollege.website && (
-                  <a 
-                    href={activeCollege.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="spotlight-website-link"
-                  >
-                    <span>Visit College Portal</span>
-                    <IconExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-
-              <div className="spotlight-body">
-                <div className="spotlight-college-meta">
-                  <div className="spotlight-acronym">{activeCollege.shortName}</div>
-                  <h3 className="spotlight-name">{activeCollege.name}</h3>
-                  <div className="spotlight-location-row">
-                    <span className="spotlight-loc-item">
-                      <IconMapPin className="w-4 h-4 text-indigo" />
-                      <strong>{activeCollege.areaName}</strong>, Pune
-                    </span>
-                    {activeCollege.pincode && (
-                      <span className="spotlight-pincode">PIN: {activeCollege.pincode}</span>
-                    )}
-                    <span className="spotlight-affil">{activeCollege.affiliation}</span>
-                  </div>
-                  {activeCollege.address && (
-                    <p className="spotlight-address">📍 Address: {activeCollege.address}</p>
-                  )}
-                </div>
-
-                <div className="spotlight-audit-panel">
-                  <div className="audit-panel-title">PG Onboarding Status for this Campus:</div>
-                  <div className="audit-checklist">
-                    <div className="audit-item">
-                      <IconCheck className="w-4 h-4 text-emerald" />
-                      <span>Walking Perimeter: 300m — 1.5km Calibrated</span>
-                    </div>
-                    <div className="audit-item">
-                      <IconCheck className="w-4 h-4 text-emerald" />
-                      <span>Zero Brokerage Owner Direct Rate Audits</span>
-                    </div>
-                    <div className="audit-item">
-                      <IconCheck className="w-4 h-4 text-emerald" />
-                      <span>Curated Mess &amp; Hygienic Meal Verification</span>
-                    </div>
-                  </div>
-
-                  {/* Student Alert Waitlist */}
-                  <div className="spotlight-action-box">
-                    {isWaitlistSuccess ? (
-                      <div className="spotlight-alert-confirmed">
-                        <IconCheck className="w-4 h-4 text-emerald" />
-                        <span>Registered! We&apos;ll notify you when rooms near {activeCollege.shortName} go live.</span>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleWaitlistSubmit} className="spotlight-waitlist-form">
-                        <input 
-                          type="email"
-                          placeholder="Enter student email for priority room alerts..."
-                          className="spotlight-email-input"
-                          value={studentEmail}
-                          onChange={(e) => setStudentEmail(e.target.value)}
-                          required
-                        />
-                        <button type="submit" className="spotlight-submit-btn">
-                          <IconBell className="w-4 h-4" />
-                          <span>Get Notified</span>
-                        </button>
-                      </form>
-                    )}
-
-                    {onOpenOwnerModal && (
-                      <button 
-                        type="button" 
-                        className="spotlight-owner-btn"
-                        onClick={onOpenOwnerModal}
-                      >
-                        <IconBuilding className="w-4 h-4" />
-                        <span>PG Owner near {activeCollege.shortName}? Pre-register your property</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* ================================================================= */}
-        {/* INTERACTIVE PUNE CAMPUS DIRECTORY                                 */}
-        {/* ================================================================= */}
-        <div className="campus-directory-container">
-          <div className="directory-header-controls">
-            <div>
-              <h3 className="directory-title">
-                Explore 45+ Verified Pune Institutions
-              </h3>
-              <p className="directory-sub">
-                Click any institution to set as your anchor and view locality onboarding details.
-              </p>
-            </div>
-
-            {/* Live Search inside directory */}
-            <div className="directory-search-wrapper">
-              <IconSearch className="directory-search-icon" />
-              <input 
-                type="text" 
-                placeholder="Search college, acronym (COEP, MIT...), or PIN..." 
-                className="directory-search-input"
-                value={filterQuery}
-                onChange={(e) => setFilterQuery(e.target.value)}
-              />
-            </div>
+        {/* Quick Filter Bar */}
+        <div className="pg-filter-toolbar">
+          {/* Gender Filter Pills */}
+          <div className="gender-filter-group" role="tablist" aria-label="Filter by gender">
+            <button
+              type="button"
+              className={`filter-chip ${selectedGender === 'all' ? 'chip-active' : ''}`}
+              onClick={() => setSelectedGender('all')}
+            >
+              All PGs ({PREVIEW_PGS.length})
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${selectedGender === 'girls' ? 'chip-active chip-girls' : ''}`}
+              onClick={() => setSelectedGender('girls')}
+            >
+              👩 Girls Only
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${selectedGender === 'boys' ? 'chip-active chip-boys' : ''}`}
+              onClick={() => setSelectedGender('boys')}
+            >
+              👨 Boys Only
+            </button>
+            <button
+              type="button"
+              className={`filter-chip ${selectedGender === 'coed' ? 'chip-active chip-coed' : ''}`}
+              onClick={() => setSelectedGender('coed')}
+            >
+              🏢 Co-living
+            </button>
           </div>
 
-          {/* Academic Stream Tabs */}
-          <div className="discovery-tabs-bar">
-            {STREAM_TABS.map(tab => (
+          {/* Popular Campus Filter Pills */}
+          <div className="campus-filter-group">
+            {POPULAR_CAMPUSES.map(c => (
               <button
-                key={tab.id}
+                key={c.id}
                 type="button"
-                className={`filter-tab-btn ${activeStream === tab.id ? 'is-active' : ''}`}
-                onClick={() => setActiveStream(tab.id)}
+                className={`campus-chip ${selectedCampusFilter === c.id ? 'campus-chip-active' : ''}`}
+                onClick={() => setSelectedCampusFilter(c.id)}
               >
-                {tab.label}
+                {c.label}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* College Cards Grid */}
-          <div className="colleges-cards-grid">
-            <AnimatePresence mode="popLayout">
-              {filteredColleges.map((college, idx) => {
-                const isCurrentAnchor = activeCollege?.slug === college.slug;
-                const areaInfo = PUNE_AREAS.find(a => a.slug === college.areaSlug);
+        {/* Active Campus Anchor Banner (If a college was searched) */}
+        {activeCollege && (
+          <div className="active-anchor-banner">
+            <div className="anchor-banner-left">
+              <span className="live-radar-dot" />
+              <span>Anchored to <strong>{activeCollege.name}</strong> ({activeCollege.areaName}, Pune)</span>
+            </div>
+            <button 
+              type="button" 
+              className="btn-clear-anchor"
+              onClick={() => {
+                if (onSelectCollege) onSelectCollege(null);
+                setSelectedCampusFilter('all');
+              }}
+            >
+              ✕ Clear Filter
+            </button>
+          </div>
+        )}
 
-                return (
-                  <motion.article 
-                    key={college.slug}
-                    className={`college-directory-card ${isCurrentAnchor ? 'is-active-anchor' : ''}`}
-                    layout
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.25, delay: idx * 0.03 }}
-                    onClick={() => handleCollegePick(college)}
-                  >
-                    <div className="card-top-row">
-                      <span className="card-acronym-badge">{college.shortName}</span>
-                      <span className="card-area-tag">
-                        📍 {areaInfo?.name || college.areaName}
-                      </span>
+        {/* The Verified PG Cards Grid */}
+        <div className="pg-cards-grid">
+          {filteredPGs.map((pg) => {
+            const isGirls = pg.genderBadge === 'girls';
+            const isBoys = pg.genderBadge === 'boys';
+            
+            return (
+              <motion.article 
+                key={pg.id}
+                className="pg-showcase-card"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.35 }}
+                onClick={() => onSelectPG && onSelectPG(pg)}
+              >
+                {/* Media Image Container */}
+                <div className="pg-card-media">
+                  <img 
+                    src={pg.heroImage} 
+                    alt={pg.name} 
+                    className="pg-cover-img" 
+                    loading="lazy"
+                  />
+                  <div className="pg-media-overlay" />
+
+                  {/* Top Floating Badges */}
+                  <div className="pg-top-badges">
+                    <span className={`pg-gender-badge ${isGirls ? 'badge-girls' : isBoys ? 'badge-boys' : 'badge-coed'}`}>
+                      {pg.gender}
+                    </span>
+                    <span className="pg-zero-fee-badge">
+                      0% Brokerage
+                    </span>
+                  </div>
+
+                  {/* Distance from Campus Tag */}
+                  <div className="pg-distance-pill">
+                    <IconMapPin className="w-3.5 h-3.5 text-emerald" />
+                    <span><strong>{pg.distance}</strong> ({pg.walkingTime}) to {pg.targetCollege.split(' ')[0]}</span>
+                  </div>
+                </div>
+
+                {/* PG Card Body */}
+                <div className="pg-card-body">
+                  <div className="pg-header-row">
+                    <div>
+                      <h3 className="pg-card-title">{pg.name}</h3>
+                      <p className="pg-card-location">{pg.area}</p>
                     </div>
-
-                    <h4 className="card-college-name">{college.name}</h4>
-
-                    <div className="card-affiliation-text">
-                      {college.affiliation}
+                    <div className="pg-rating-badge">
+                      <IconStar className="w-3.5 h-3.5 text-amber fill-current" />
+                      <span>{pg.rating}</span>
                     </div>
+                  </div>
 
-                    <div className="card-categories-row">
-                      {college.categories.slice(0, 3).map(cat => (
-                        <span key={cat} className="card-cat-pill">{cat}</span>
+                  {/* Room Sharing Options */}
+                  <div className="pg-sharing-row">
+                    <span className="sharing-label">Rooms:</span>
+                    <div className="sharing-tags-list">
+                      {pg.sharingTypes.map(st => (
+                        <span key={st} className="sharing-tag">{st}</span>
                       ))}
-                      {college.categories.length > 3 && (
-                        <span className="card-cat-more">+{college.categories.length - 3}</span>
-                      )}
+                    </div>
+                  </div>
+
+                  {/* Amenities Highlights */}
+                  <div className="pg-amenities-row">
+                    {pg.amenities.slice(0, 3).map((a, i) => (
+                      <span key={i} className="amenity-chip">
+                        {a.name.includes('Wi-Fi') ? <IconWifi className="w-3 h-3 text-cyan" /> :
+                         a.name.includes('Meal') || a.name.includes('Food') ? <IconUtensils className="w-3 h-3 text-amber" /> :
+                         <IconCheck className="w-3 h-3 text-emerald" />}
+                        <span>{a.name}</span>
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Card Bottom: Rent & Action */}
+                  <div className="pg-card-footer">
+                    <div className="pg-price-stack">
+                      <span className="price-caption">Starting Rent</span>
+                      <div className="price-amount-row">
+                        <span className="price-val">₹{pg.rent}</span>
+                        <span className="price-unit">/month</span>
+                      </div>
                     </div>
 
-                    <div className="card-footer-action">
-                      <div className="card-institute-code">
-                        {college.instituteCode || 'SPPU Verified'}
-                      </div>
-                      <button 
-                        type="button" 
-                        className={`card-select-btn ${isCurrentAnchor ? 'btn-is-selected' : ''}`}
-                      >
-                        {isCurrentAnchor ? (
-                          <>
-                            <IconCheck className="w-3.5 h-3.5" />
-                            <span>Active Anchor</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Select Campus</span>
-                            <IconArrowRight className="w-3.5 h-3.5" />
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </motion.article>
-                );
-              })}
+                    <button 
+                      type="button" 
+                      className="btn-view-pg"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onSelectPG) onSelectPG(pg);
+                      }}
+                    >
+                      <span>View Details</span>
+                      <IconArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </motion.article>
+            );
+          })}
+        </div>
+
+        {/* Fallback if no PGs match filter */}
+        {filteredPGs.length === 0 && (
+          <div className="pg-empty-filter-state">
+            <p>No accommodations found matching this specific filter.</p>
+            <button 
+              type="button" 
+              className="btn-reset-filters"
+              onClick={() => {
+                setSelectedGender('all');
+                setSelectedCampusFilter('all');
+                if (onSelectCollege) onSelectCollege(null);
+              }}
+            >
+              Reset Filters to View All PGs
+            </button>
+          </div>
+        )}
+
+        {/* ================================================================= */}
+        {/* COMPACT CAMPUS DIRECTORY DRAWER (Non-intrusive)                  */}
+        {/* ================================================================= */}
+        <div className="compact-campus-explorer">
+          <div className="explorer-card">
+            <div className="explorer-header">
+              <div className="explorer-text">
+                <span className="explorer-pill">45+ PUNE INSTITUTIONS</span>
+                <h3 className="explorer-title">Need accommodation near a specific university or college?</h3>
+                <p className="explorer-desc">Search your college gate anchor to check pedestrian walk times and verified PG availability.</p>
+              </div>
+
+              <div className="explorer-actions">
+                <div className="explorer-search-box">
+                  <IconSearch className="w-4 h-4 text-muted" />
+                  <input 
+                    type="text" 
+                    placeholder="Search college, COEP, MIT, PIN..." 
+                    value={collegeSearchQuery}
+                    onChange={(e) => {
+                      setCollegeSearchQuery(e.target.value);
+                      if (!isCollegeDrawerOpen) setIsCollegeDrawerOpen(true);
+                    }}
+                    className="explorer-search-input"
+                  />
+                </div>
+
+                <button 
+                  type="button"
+                  className="btn-toggle-colleges"
+                  onClick={() => setIsCollegeDrawerOpen(!isCollegeDrawerOpen)}
+                >
+                  <span>{isCollegeDrawerOpen ? 'Hide Campuses ▲' : 'Browse All 45 Campuses ▼'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Expandable College Grid (Only shown when opened or searched) */}
+            <AnimatePresence>
+              {isCollegeDrawerOpen && (
+                <motion.div 
+                  className="explorer-colleges-drawer"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="drawer-colleges-grid">
+                    {filteredColleges.map((college) => {
+                      const isPicked = activeCollege?.slug === college.slug;
+                      return (
+                        <div 
+                          key={college.slug} 
+                          className={`drawer-college-card ${isPicked ? 'card-picked' : ''}`}
+                          onClick={() => handlePickCollege(college)}
+                        >
+                          <div className="drawer-college-top">
+                            <span className="drawer-acronym">{college.shortName}</span>
+                            <span className="drawer-area">📍 {college.areaName}</span>
+                          </div>
+                          <strong className="drawer-college-name">{college.name}</strong>
+                          <div className="drawer-college-foot">
+                            <span className="drawer-affil">{college.affiliation}</span>
+                            <span className="drawer-action-text">{isPicked ? '✓ Active' : 'Filter PGs →'}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
+
           </div>
         </div>
 

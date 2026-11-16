@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .how-it-works-section {
-  padding: 85px 0 95px;
+  padding: 45px 0 55px;
   background-color: var(--bg-surface);
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
@@ -12,7 +12,7 @@
 
 .how-header {
   max-width: 660px;
-  margin: 0 auto 3.5rem;
+  margin: 0 auto 1.75rem;
   text-align: center;
 }
 
